@@ -1,0 +1,14 @@
+@Cenitu.Security.Api_HostAddress = https://localhost:7064
+
+GET {{Cenitu.Security.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+GET {{Cenitu.Security.Api_HostAddress}}/login/
+Accept: application/json
+###
+
+
+GET {{Cenitu.Security.Api_HostAddress}}/api/user
+Authorization: Bearer CfDJ8G6aQF-3qQVEgDDV1PhQCkosqPsLq-QXuF3k22mv6grYJjO2_tcOuJMIZLocr5cdmKJVmxV8j3QomE91EFzSTQgAo1VdYAy0Qy8lIbV3Jo8gQMBWu-bTjgr3v0jm8XdSvQAn0dtCYjdH-9ZHPxIRTB_4wzZMR0EvN-zFkTUAggzExift01suWcq9HZR60k2n5mZIg7SJMry-B1-jl06KpvLhhsXopsAjUmvC3fxsm-BbK6_3WUIcJ8eiWtSlCiJs3wzfxLXX46oO4SMPgWyS3rLhStN8iyT2uMilxF2lQF2ZIyWyyC1lEo7rVActfXzKQ4qghVHXe7jUszC5RN2SzlzJjDUymOZEq7xtbOUws9JGqrIiYuMPdUOJnbrlrzGSrrmR5uYcsHISzVtIFUX0MC_K3ccJXmw-bSDMq5gckEpfCv3AoEKkxyhwuDQB4qEbYjfGN4hMA1ALVGhsS-xsIIW3vSSr3bGnDTVPiTEKvJIo2trkEHnxdOtB37dykv346jqwtajOk3itlQ-U3RKGaRvGrBpIx5iwnyguQ9KSQwLjFbzn2iQZZMLmjIgRwkL6l86RAlUHXN-8QzjG1aE50B47Ul95Yl_5YwHvRAUVGDM9Xi0_ndSyVrCEGHxNsMxDEP0NqFIkzYUSKpw9ySXJe9yemMR-cwwbVIjjLSYiCGJJvfr04NcOV-j61higNpZIUg
+###
