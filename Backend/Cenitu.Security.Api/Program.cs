@@ -1,5 +1,6 @@
 using Cenitu.Security.DataAccess;
 using Cenitu.Security.Domain.Entities;
+using Cenitu.Security.Services.AutoMapper;
 using Cenitu.Security.Services.Interfaces;
 using Cenitu.Security.Services.Services;
 using Microsoft.AspNetCore.Identity;
@@ -24,7 +25,8 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opts =>
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddScoped<IRoleService, RoleService>();
-
+builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
