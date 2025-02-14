@@ -18,7 +18,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
         public CustomAuthenticationStateProvider(IHttpClientFactory httpClientFactory)
         {
-            httpClient = httpClientFactory.CreateClient("Auth");
+            this.httpClient = httpClientFactory.CreateClient("Auth");
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
@@ -53,6 +53,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
                     var id = new ClaimsIdentity(claims, nameof(CustomAuthenticationStateProvider));
                     user = new ClaimsPrincipal(id);
                     _authinticated = true;
+                   
                 }
             }
             catch (Exception ex)
@@ -60,7 +61,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
                 
             }
-
+            var bok=new AuthenticationState(user);
             return new AuthenticationState(user);
         }
 

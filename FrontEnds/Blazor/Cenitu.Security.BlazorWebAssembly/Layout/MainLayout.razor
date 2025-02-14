@@ -5,10 +5,18 @@
     </div>
 
     <main>
-        
+
         <div class="top-row px-4">
-            <a href="login"><span class="bi bi-pencil-square" aria-hidden="true" style="vertical-align:middle"></span>Login</a>
-            <a href="register"><span class="bi bi-pencil-square" aria-hidden="true" style="vertical-align:middle"></span>Register</a>
+            <AuthorizeView>
+                <Authorized>
+                    <span class="bi bi-person" aria-hidden="true" style="vertical-align:middle"></span>Welcome, @context.User.Identity!.Name
+                    <a href="logout"><span class="bi bi-box-arrow-right" aria-hidden="true" style="vertical-align:middle"></span>Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="login"><span class="bi bi-pencil-square" aria-hidden="true" style="vertical-align:middle"></span>Login</a>
+                    <a href="register"><span class="bi bi-pencil-square" aria-hidden="true" style="vertical-align:middle"></span>Register</a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4">

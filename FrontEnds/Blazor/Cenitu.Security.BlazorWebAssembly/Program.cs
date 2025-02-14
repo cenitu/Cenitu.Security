@@ -18,8 +18,6 @@ builder.Services.AddScoped(sp => (IAccountManagement)sp.GetRequiredService<Authe
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["FrontendUrl"] ?? "https://localhost:7292") });
 
-builder.Services.AddHttpClient("Auth", opts =>
-{
-    opts.BaseAddress = new Uri(builder.Configuration["BackendUrl"] ?? "https://localhost:7064");
-}).AddHttpMessageHandler<CustomHttpHandler>();
+builder.Services.AddHttpClient("Auth", opt=>
+   opt.BaseAddress = new Uri(builder.Configuration["BackendUrl"] ?? "https://localhost:7064")).AddHttpMessageHandler<CustomHttpHandler>();
 await builder.Build().RunAsync();
