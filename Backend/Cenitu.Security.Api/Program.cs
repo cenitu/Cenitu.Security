@@ -42,9 +42,17 @@ builder.Services.AddSwaggerGen(opts =>
     opts.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
+builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy("wasm", policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:7292").AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
-
+app.UseCors("wasm");
 app.MapIdentityApi<ApplicationUser>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
