@@ -5,6 +5,7 @@ using System.IO.Pipes;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace Cenitu.Security.BlazorWebAssembly.Services
@@ -53,15 +54,15 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
                     var id = new ClaimsIdentity(claims, nameof(CustomAuthenticationStateProvider));
                     user = new ClaimsPrincipal(id);
                     _authinticated = true;
-                   
+
                 }
             }
             catch (Exception ex)
             {
 
-                
+
             }
-            var bok=new AuthenticationState(user);
+            var bok = new AuthenticationState(user);
             return new AuthenticationState(user);
         }
 
@@ -125,6 +126,22 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
             }
             return new FormResult { Succeeded = false, ErrorList = ["Invalid email and/or password."] };
 
+        }
+
+        public async Task LogoutAsync()
+        {
+
+            const string empty = "{}";
+            var emptyContent = new StringContent(empty, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync("api/user/logout", emptyContent);
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+
+        }
+
+        public async Task<bool> CheckAuthenticatedAsync()
+        {
+            await GetAuthenticationStateAsync();
+            return _authinticated;
         }
     }
 }

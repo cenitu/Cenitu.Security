@@ -17,7 +17,7 @@ namespace Cenitu.Security.Api.Controllers
             this.roleService = roleService;
         }
 
-        [Authorize(Roles = "Admin, User")]
+        [Authorize]
         [HttpGet("GetUserRole")]
         public async Task<IActionResult> GetUserRole(string emailId)
         {
