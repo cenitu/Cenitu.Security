@@ -53,5 +53,7 @@ namespace Cenitu.Security.Api.Controllers
             }
             return Ok(result);
         }
+
+      
     }
 }

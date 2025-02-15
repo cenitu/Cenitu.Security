@@ -13,5 +13,6 @@ namespace Cenitu.Security.Services.Interfaces
         Task<List<string>> GetUserRoleAsync(string emailId);
         Task<List<string>> AddRolesAsync(string[] roles);
         Task<bool> AddUserRoleAsync(string emailId, string[] roles);
+        Task<bool> SeedAdminUserAndRoleAsyc();
     }
 }

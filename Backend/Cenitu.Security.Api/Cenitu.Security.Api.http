@@ -21,3 +21,7 @@ Content-Type: application/json
 }
 
 ###
+
+POST {{Cenitu.Security.Api_HostAddress}}/api/seed/SeedAdminUserAndRole
+
+###

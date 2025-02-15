@@ -54,18 +54,18 @@ namespace Cenitu.Security.Services.Services
         public async Task<bool> AddUserRoleAsync(string emailId, string[] roles)
         {
             var user = await userManager.FindByEmailAsync(emailId);
-            
-            
+
+
             var roleList = await CheckRoleExixtsAsync(roles);
             if (user != null && roleList.Count == roles.Length)
             {
                 var result = await userManager.AddToRolesAsync(user, roleList);
-               return result.Succeeded;
+                return result.Succeeded;
             }
             return false;
         }
 
-       private async Task<List<string>> CheckRoleExixtsAsync(string[] roles)
+        private async Task<List<string>> CheckRoleExixtsAsync(string[] roles)
         {
             var roleList = new List<string>();
             foreach (var role in roles)
@@ -76,6 +76,26 @@ namespace Cenitu.Security.Services.Services
                 }
             }
             return roleList;
+        }
+
+        public async Task<bool> SeedAdminUserAndRoleAsyc()
+        {
+            var roleCount = roleManager.Roles.Count();
+            var userCount = userManager.Users.Count();
+            var adminUser = new ApplicationUser { Email = "admin@cenitusecurity.com", UserName = "admin@cenitusecurity.com" };
+            if (roleCount == 0 && userCount == 0)
+            {
+                var role = await roleManager.CreateAsync(new ApplicationRole { Name = "Admin" });
+                var userCreated = await userManager.CreateAsync(adminUser, "Admin@123");
+                var user = await userManager.FindByEmailAsync("admin@cenitusecurity.com");
+                if (user != null)
+                {
+                    await userManager.AddToRoleAsync(user, "Admin");
+                    return true;
+                }
+                return false;
+            }
+            return false;
         }
     }
 }
