@@ -1,0 +1,29 @@
+﻿@page "/product/create"
+@inject IProductManager productManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+<h3>ProductCreate</h3>
+<a class="btn btn-primary" href="products">Back</a>
+
+<div class="flex-outer">
+    <div class="mb-3">
+        <label class="form-label" for="Code">Code</label>
+        <input type="text" class="form-control" @bind="product.Code" autofocus autocomplete="on" required id="Code" name="codeInput" placeholder="Enter Product Code" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="Description">Description</label>
+        <input type="text" class="form-control" @bind="product.Description" autofocus autocomplete="on" required id="Description" name="descriptionInput" placeholder="Enter Product Description" />
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" @onclick="AddProductAsync">Add</button>
+    </div>
+</div>
+
+@code {
+    private ProductAddDto product = new ProductAddDto();
+    public async Task AddProductAsync()
+    {
+        await productManager.AddProductAsync(product);
+        NavigationManager.NavigateTo("products");
+    }
+}

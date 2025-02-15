@@ -1,6 +1,9 @@
 ﻿using Blazored.LocalStorage;
+using Cenitu.Security.BlazorWebAssembly.Managers;
 using Cenitu.Security.BlazorWebAssembly.Services;
+using Cenitu.Security.Dtos;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.RenderTree;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace Cenitu.Security.BlazorWebAssembly.Extensions
@@ -13,8 +16,10 @@ namespace Cenitu.Security.BlazorWebAssembly.Extensions
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>(); //For cookie based authentication
             builder.Services.AddHttpClient("Auth", opt =>
                opt.BaseAddress = new Uri(builder.Configuration["BackendUrl"] ?? "https://localhost:7064")).AddHttpMessageHandler<CustomHttpHandler>();
+            AddManagers(builder);
         }
 
+        
         public static void AddTokenAuthentication(this WebAssemblyHostBuilder builder)
         {
             builder.Services.AddBlazoredLocalStorage();
@@ -22,6 +27,13 @@ namespace Cenitu.Security.BlazorWebAssembly.Extensions
             builder.Services.AddScoped<AuthenticationStateProvider, CustomTokenAuthenticationStateProvider>(); //For token based authentication
             builder.Services.AddHttpClient("Auth", opt =>
                opt.BaseAddress = new Uri(builder.Configuration["BackendUrl"] ?? "https://localhost:7064")).AddHttpMessageHandler<CustomHttpHandlerForTokenAuth>();
+            AddManagers(builder);
         }
+        private static void AddManagers(WebAssemblyHostBuilder builder)
+        {
+            builder.Services.AddScoped<IProductManager, ProductManager>();
+        }
+
+
     }
 }

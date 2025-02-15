@@ -1,0 +1,44 @@
+﻿@page "/products"
+@attribute [Authorize(Roles ="Admin,User")]
+@inject IProductManager productManager
+<h3>ProductList</h3>
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <a class="btn btn-primary" href="product/create">Create</a>
+    </Authorized>
+</AuthorizeView>
+@if (products.Count>0)
+{
+    foreach (var product in products)
+    {
+        <p>@product.Id | @product.Code | @product.Description</p>
+    }
+
+    <div class="grid" tabindex="-1">
+    <QuickGrid ItemsProvider="@productsProvider" Virtualize="true">
+        <PropertyColumn Title="ID" Property="@(c => c.Id)" />
+        <PropertyColumn Title="CODE" Property="@(c => c.Code)" />
+        <PropertyColumn Title="DESCRIPTION" Property="@(c => c.Description)" />
+
+    </QuickGrid>
+</div>
+}   
+else
+{
+    <p>No products found</p>
+}
+
+@code {
+    GridItemsProvider<ProductListDto>? productsProvider;
+    List<ProductListDto> products = new List<ProductListDto>();
+    override protected async Task OnInitializedAsync()
+    {
+        products = await productManager.GetProductsAsync();
+        // Grid için uygun bir provider oluştur
+        productsProvider = async (GridItemsProviderRequest<ProductListDto> request) =>
+        {
+           
+            return  GridItemsProviderResult.From(products, products.Count);
+        };
+    }
+}
