@@ -1,6 +1,79 @@
 ﻿@page "/products"
 @attribute [Authorize(Roles ="Admin,User")]
 @inject IProductManager productManager
+
+<h3>Product List</h3>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <a class="btn btn-primary" href="product/create" >Create</a>
+    </Authorized>
+</AuthorizeView>
+
+<RadzenDataGrid TItem="ProductListDto" AllowPaging="true" AllowSorting="true"
+                PageSize="10" LoadData="LoadProducts" Count="@totalCount">
+    <Columns>
+        <RadzenDataGridColumn TItem="ProductListDto" Property="Id" Title="ID" Sortable="true" />
+        <RadzenDataGridColumn TItem="ProductListDto" Property="Code" Title="Code" Sortable="true" />
+        <RadzenDataGridColumn TItem="ProductListDto" Property="Description" Title="Description" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private List<ProductListDto> products = new();
+    private int totalCount;
+
+    private async Task LoadProducts(LoadDataArgs args)
+    {
+        // Sıralama bilgilerini al
+        string sortColumn = args.OrderBy ?? "Id";
+        string sortDirection = args.Sorts.Any() && args.Sorts.First().SortOrder == SortOrder.Descending ? "desc" : "asc";
+
+        // Sayfalama bilgilerini al
+        int page = (args.Skip.Value / args.Top.Value) + 1;
+        int pageSize = args.Top.Value;
+
+        // API'den verileri çek
+        var pagedData = await productManager.GetProductsAsync(page, pageSize, sortColumn, sortDirection);
+
+        // Verileri güncelle
+        products = pagedData.Data;
+        totalCount = pagedData.TotalCount;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @page "/products"
+@attribute [Authorize(Roles ="Admin,User")]
+@inject IProductManager productManager
 <h3>ProductList</h3>
 <AuthorizeView Roles="Admin">
     <Authorized>
@@ -42,3 +115,4 @@ else
         };
     }
 }
+ *@

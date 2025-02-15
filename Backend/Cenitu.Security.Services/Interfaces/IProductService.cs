@@ -11,5 +11,6 @@ namespace Cenitu.Security.Services.Interfaces
     {
         Task<ProductAddDto> AddProductAsync(ProductAddDto productAddDto);
         Task<List<ProductListDto>> GetProductsAsync();
+        Task<PagedAndSortedList<ProductListDto>> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc");
     }
 }

@@ -22,5 +22,19 @@ namespace Cenitu.Security.BlazorWebAssembly.Managers
         {
             return await httpClient.GetFromJsonAsync<List<ProductListDto>>("api/Products/GetProducts") ?? new List<ProductListDto>();
         }
+
+        public async Task<PagedAndSortedList<ProductListDto>> GetProductsAsync(int page, int pageSize, string sortColumn, string sortDirection)
+        {
+            var response = await httpClient.GetFromJsonAsync<PagedAndSortedList<ProductListDto>>(
+                $"api/Products/GetProductsPaged?page={page}&pageSize={pageSize}&sortColumn={sortColumn}&sortDirection={sortDirection}");
+
+            return response ?? new PagedAndSortedList<ProductListDto>
+            {
+                Data = new List<ProductListDto>(),
+                TotalCount = 0,
+                PageSize = pageSize,
+                PageIndex = page
+            };
+        }
     }
 }
