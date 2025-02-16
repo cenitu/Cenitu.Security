@@ -1,118 +1,95 @@
 ﻿@page "/products"
-@attribute [Authorize(Roles ="Admin,User")]
+@attribute [Authorize(Roles = "Admin,User")]
 @inject IProductManager productManager
 
-<h3>Product List</h3>
-
-<AuthorizeView Roles="Admin">
-    <Authorized>
-        <a class="btn btn-primary" href="product/create" >Create</a>
-    </Authorized>
-</AuthorizeView>
-
-<RadzenDataGrid TItem="ProductListDto" AllowPaging="true" AllowSorting="true"
-                PageSize="10" LoadData="LoadProducts" Count="@totalCount">
-    <Columns>
-        <RadzenDataGridColumn TItem="ProductListDto" Property="Id" Title="ID" Sortable="true" />
-        <RadzenDataGridColumn TItem="ProductListDto" Property="Code" Title="Code" Sortable="true" />
-        <RadzenDataGridColumn TItem="ProductListDto" Property="Description" Title="Description" />
-    </Columns>
-</RadzenDataGrid>
-
-@code {
-    private List<ProductListDto> products = new();
-    private int totalCount;
-
-    private async Task LoadProducts(LoadDataArgs args)
-    {
-        // Sıralama bilgilerini al
-        string sortColumn = args.OrderBy ?? "Id";
-        string sortDirection = args.Sorts.Any() && args.Sorts.First().SortOrder == SortOrder.Descending ? "desc" : "asc";
-
-        // Sayfalama bilgilerini al
-        int page = (args.Skip.Value / args.Top.Value) + 1;
-        int pageSize = args.Top.Value;
-
-        // API'den verileri çek
-        var pagedData = await productManager.GetProductsAsync(page, pageSize, sortColumn, sortDirection);
-
-        // Verileri güncelle
-        products = pagedData.Data;
-        totalCount = pagedData.TotalCount;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* @page "/products"
-@attribute [Authorize(Roles ="Admin,User")]
-@inject IProductManager productManager
-<h3>ProductList</h3>
 <AuthorizeView Roles="Admin">
     <Authorized>
         <a class="btn btn-primary" href="product/create">Create</a>
     </Authorized>
 </AuthorizeView>
-@if (products.Count>0)
-{
-    foreach (var product in products)
-    {
-        <p>@product.Id | @product.Code | @product.Description</p>
-    }
 
-    <div class="grid" tabindex="-1">
-    <QuickGrid ItemsProvider="@productsProvider" Virtualize="true">
-        <PropertyColumn Title="ID" Property="@(c => c.Id)" />
-        <PropertyColumn Title="CODE" Property="@(c => c.Code)" />
-        <PropertyColumn Title="DESCRIPTION" Property="@(c => c.Description)" />
+<RadzenDataGrid @ref="grid"  SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@products"
+                LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterMode="FilterMode.Advanced" AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="4"
+                PagerHorizontalAlign="HorizontalAlign.Center" ColumnWidth="200px">
+    <Columns>
+       
+        <RadzenDataGridColumn Property="@nameof(ProductListDto.Id)" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(ProductListDto.Code)" Title="Code">
+            
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(ProductListDto.Description)" Title="Description" Width="150px" />
+        
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
 
-    </QuickGrid>
-</div>
-}   
-else
-{
-    <p>No products found</p>
-}
 
 @code {
-    GridItemsProvider<ProductListDto>? productsProvider;
-    List<ProductListDto> products = new List<ProductListDto>();
-    override protected async Task OnInitializedAsync()
+    bool isLoading;
+    int count;
+    ODataEnumerable<ProductListDto> products;
+
+    RadzenDataGrid<ProductListDto> grid;
+
+    protected override async Task OnInitializedAsync()
     {
-        products = await productManager.GetProductsAsync();
-        // Grid için uygun bir provider oluştur
-        productsProvider = async (GridItemsProviderRequest<ProductListDto> request) =>
-        {
-           
-            return  GridItemsProviderResult.From(products, products.Count);
-        };
+        await base.OnInitializedAsync();
+
+
+    }
+
+
+
+
+    async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+
+        string sortColumn = args.OrderBy ?? "Id";
+        string sortDirection = args.Sorts.Any() && args.Sorts.First().SortOrder == SortOrder.Descending ? "desc" : "asc";
+
+        int page = (args.Skip.Value / args.Top.Value) + 1;
+        int pageSize = args.Top.Value;
+        var result = await productManager.GetProductsAsync(page, pageSize, sortColumn, sortDirection);
+
+        // Update the Data property
+        products = result.Data.AsODataEnumerable();
+        // Update the count
+        count = result.TotalCount;
+
+        isLoading = false;
     }
 }
- *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

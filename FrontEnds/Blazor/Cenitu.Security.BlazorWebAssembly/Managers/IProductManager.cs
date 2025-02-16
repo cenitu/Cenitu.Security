@@ -6,6 +6,6 @@ namespace Cenitu.Security.BlazorWebAssembly.Managers
     {
         Task<ProductAddDto> AddProductAsync(ProductAddDto productAddDto);
         Task<List<ProductListDto>> GetProductsAsync();
-        Task<PagedAndSortedList<ProductListDto>> GetProductsAsync(int page, int pageSize, string sortColumn, string sortDirection);
+        Task<PagedAndSortedResult<ProductListDto>> GetProductsAsync(int page, int pageSize, string sortColumn, string sortDirection);
     }
 }

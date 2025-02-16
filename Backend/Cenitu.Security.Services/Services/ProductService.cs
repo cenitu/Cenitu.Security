@@ -43,7 +43,7 @@ namespace Cenitu.Security.Services.Services
             return mapper.Map<ProductAddDto>(product);
         }
 
-        public async Task<PagedAndSortedList<ProductListDto>> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc")
+        public async Task<PagedAndSortedResult<ProductListDto>> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc")
         {
             var query = context.Products.AsQueryable();
 
@@ -74,7 +74,7 @@ namespace Cenitu.Security.Services.Services
 
 
             // Sayfalama sonucu döndür
-            var pagedAndSortedList = new PagedAndSortedList<ProductListDto>
+            var pagedAndSortedList = new PagedAndSortedResult<ProductListDto>
             {
                 Data = products,
                 TotalCount = totalCount,

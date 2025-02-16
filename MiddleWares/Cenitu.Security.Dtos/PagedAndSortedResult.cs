@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Cenitu.Security.Dtos
 {
-    public class PagedAndSortedList<T> : List<T> 
+    public class PagedAndSortedResult<T> 
     {
         public List<T> Data { get; set; } = [];
         public int TotalCount { get; set; }
