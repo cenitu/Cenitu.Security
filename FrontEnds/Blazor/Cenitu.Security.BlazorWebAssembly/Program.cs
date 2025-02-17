@@ -5,8 +5,12 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Cenitu.Security.BlazorWebAssembly.Services;
 using Blazored.LocalStorage;
 using Cenitu.Security.BlazorWebAssembly.Extensions;
+using Syncfusion.Blazor;
 
+
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NMaF1cXmhLYVF0WmFZfVtgfV9CYlZVQ2YuP1ZhSXxWdkdiXH9XdHZRQWJYVEw=");
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+			builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddAuthorizationCore();
 
@@ -39,7 +43,7 @@ builder.AddTokenAuthentication();
 builder.Services.AddScoped(sp => (IAccountManagement)sp.GetRequiredService<AuthenticationStateProvider>());
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["FrontendUrl"] ?? "https://localhost:7292") });
-
+builder.Services.AddSyncfusionBlazor();
 
 
 

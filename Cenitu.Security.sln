@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.Dtos", "Mid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.BlazorWebAssembly", "FrontEnds\Blazor\Cenitu.Security.BlazorWebAssembly\Cenitu.Security.BlazorWebAssembly.csproj", "{4A081418-E401-4F80-A3DB-1C8DDE3EF362}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.BlazorWasmSyncFusion", "FrontEnds\Cenitu.Security.BlazorWasmSyncFusion\Cenitu.Security.BlazorWasmSyncFusion\Cenitu.Security.BlazorWasmSyncFusion.csproj", "{E12C621F-DE49-4590-81C3-27447E0D1A24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E12C621F-DE49-4590-81C3-27447E0D1A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E12C621F-DE49-4590-81C3-27447E0D1A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E12C621F-DE49-4590-81C3-27447E0D1A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E12C621F-DE49-4590-81C3-27447E0D1A24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{66287676-C84F-46B1-A1D9-261463990029} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{591F8188-0EFD-47FA-899A-B9DB45C9EE54} = {468D5A04-574A-42DB-879F-BC9197D65BBD}
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362} = {147ACDBD-B699-4D41-B029-6D080DA4FB15}
+		{E12C621F-DE49-4590-81C3-27447E0D1A24} = {147ACDBD-B699-4D41-B029-6D080DA4FB15}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2B16260-CAF0-4280-991C-796DEC8AB729}

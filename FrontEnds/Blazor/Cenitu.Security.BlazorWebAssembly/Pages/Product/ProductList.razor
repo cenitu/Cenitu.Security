@@ -11,10 +11,10 @@
 <RadzenDataGrid @ref="grid"  SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@products"
                 LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                 FilterMode="FilterMode.Advanced" AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="4"
-                PagerHorizontalAlign="HorizontalAlign.Center" ColumnWidth="200px">
+                PagerHorizontalAlign="Radzen.HorizontalAlign.Center" ColumnWidth="200px">
     <Columns>
        
-        <RadzenDataGridColumn Property="@nameof(ProductListDto.Id)" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(ProductListDto.Id)" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="Radzen.TextAlign.Center" />
         <RadzenDataGridColumn Property="@nameof(ProductListDto.Code)" Title="Code">
             
         </RadzenDataGridColumn>
@@ -25,6 +25,8 @@
         <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
     </LoadingTemplate>
 </RadzenDataGrid>
+
+
 
 
 @code {

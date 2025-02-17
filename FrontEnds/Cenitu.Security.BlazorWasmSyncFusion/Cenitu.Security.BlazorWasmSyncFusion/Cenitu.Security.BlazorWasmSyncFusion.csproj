@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.PivotTable" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.TreeGrid" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.CircularGauge" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.StockChart" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.Charts" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.Diagram" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.HeatMap" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.LinearGauge" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
+
+
+
+</Project>
