@@ -8,7 +8,7 @@ using Cenitu.Security.BlazorWebAssembly.Extensions;
 using Syncfusion.Blazor;
 
 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NMaF1cXmhLYVF0WmFZfVtgfV9CYlZVQ2YuP1ZhSXxWdkdiXH9XdHZRQWJYVEw=");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NMaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWX1feHRURWRcWE1/X0E=");
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 			builder.Services.AddSyncfusionBlazor();
 
