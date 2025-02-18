@@ -51,7 +51,7 @@
         isLoading = true;
 
         string sortColumn = args.OrderBy ?? "Id";
-        string sortDirection = args.Sorts.Any() && args.Sorts.First().SortOrder == SortOrder.Descending ? "desc" : "asc";
+        string sortDirection = args.Sorts.Any() && args.Sorts.First().SortOrder == Radzen.SortOrder.Descending ? "desc" : "asc";
 
         int page = (args.Skip.Value / args.Top.Value) + 1;
         int pageSize = args.Top.Value;

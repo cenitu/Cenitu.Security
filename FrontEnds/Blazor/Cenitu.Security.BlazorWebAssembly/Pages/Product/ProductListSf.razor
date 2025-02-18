@@ -1,56 +1,24 @@
-﻿@page "/productlistsf"
-@inject IProductManager ProductManager
+﻿@page "/productsListSf"
 
-<h3>ProductListSf</h3>
 
-<SfGrid DataSource="@products"
-        AllowPaging="true" AllowSorting="true" AllowFiltering="true"
-        @ref="Grid"
-        OnActionBegin="OnActionBegin">
-    <GridPageSettings PageSize="10"></GridPageSettings>
+
+
+<SfGrid TValue="ProductListDto" AllowPaging="true" AllowSorting="true">
+    <SfDataManager Adaptor="Adaptors.ODataV4Adaptor" Url="https://localhost:7064/odata/Products">
+    </SfDataManager>
+    @*     <DataManager Adaptor="Adaptors.CustomAdaptor" CustomAdaptor="@_authAdaptor" /> *@
+    <GridPageSettings PageSize="8"></GridPageSettings>
     <GridColumns>
-        <GridColumn Field="Id" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="100"></GridColumn>
-        <GridColumn Field="Code" HeaderText="Code" Width="150"></GridColumn>
-        <GridColumn Field="Description" HeaderText="Description" Width="250"></GridColumn>
+        <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
+        <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
+        <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="250" />
     </GridColumns>
+    <GridPageSettings PageSize="10"></GridPageSettings>
 </SfGrid>
 
 @code {
-    SfGrid<ProductListDto>? Grid;
-    List<ProductListDto> products = new();
-    int totalRecords = 0;
-    int currentPage = 1;
-    int pageSize = 10;
-    string sortColumn = "Id";
-    string sortDirection = "asc";
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
 
-    async Task OnActionBegin(ActionEventArgs<ProductListDto> args)
-    {
-        // if (args.RequestType == ActionType.Paging)
-        // {
-        //     currentPage = args.CurrentPage;
-        //     pageSize = args.PageSize;
-        // }
-        // else if (args.RequestType == ActionType.Sorting)
-        // {
-        //     sortColumn = args.ColumnName;
-        //     sortDirection = args.SortDirection == Syncfusion.Blazor.Grids.SortDirection.Descending ? "desc" : "asc";
-        // }
-
-        await LoadData();
-    }
-
-    async Task LoadData()
-    {
-        var result = await ProductManager.GetProductsAsync(currentPage, pageSize, sortColumn, sortDirection);
-        products = result.Data.ToList();
-        totalRecords = result.TotalCount;
-
-        await Grid?.Refresh();
-    }
+   
 }
+

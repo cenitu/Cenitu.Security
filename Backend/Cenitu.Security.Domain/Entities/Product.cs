@@ -10,6 +10,7 @@ namespace Cenitu.Security.Domain.Entities
     {
         public int Id { get; set; }
         public string Code { get; set; }
-        public string Description { get; set; }    
+        public string Description { get; set; } 
+        public ICollection<Order> Orders { get; set; }
     }
 }

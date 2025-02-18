@@ -5,6 +5,7 @@ using Cenitu.Security.Dtos;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -70,7 +71,7 @@ namespace Cenitu.Security.Services.Services
                 })
                 .ToListAsync();
 
-            
+
 
 
             // Sayfalama sonucu döndür
@@ -83,6 +84,11 @@ namespace Cenitu.Security.Services.Services
 
             };
             return pagedAndSortedList;
+        }
+
+        public IQueryable<Product> Get()
+        {
+            return context.Products;
         }
     }
 }

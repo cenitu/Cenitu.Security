@@ -25,3 +25,11 @@ Content-Type: application/json
 POST {{Cenitu.Security.Api_HostAddress}}/api/seed/SeedAdminUserAndRole
 
 ###
+
+GET {{Cenitu.Security.Api_HostAddress}}/odata/Products
+
+###
+
+GET {{Cenitu.Security.Api_HostAddress}}/odata/Products
+
+###
