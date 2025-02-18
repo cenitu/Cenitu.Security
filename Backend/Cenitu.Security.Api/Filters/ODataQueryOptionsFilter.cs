@@ -53,5 +53,13 @@ public class ODataQueryOptionsFilter : IOperationFilter
             Schema = new OpenApiSchema { Type = "boolean" },
             Description = "Include a count of the total number of items in the response. Example: $count=true"
         });
+        operation.Parameters.Add(new OpenApiParameter
+        {
+            Name = "$expand",
+            In = ParameterLocation.Query,
+            Required = false,
+            Schema = new OpenApiSchema { Type = "string" },
+            Description = "Include a count of the total number of items in the response. Example: $count=true"
+        });
     }
 }

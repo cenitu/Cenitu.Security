@@ -1,0 +1,91 @@
+﻿@page "/orders"
+@using Cenitu.Security.BlazorWebAssembly.Adaptors
+
+
+<SfGrid TValue="Order" AllowPaging="true">
+    <SfDataManager Url="https://localhost:7064/odata/Orders?$expand=Product" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
+    <GridPageSettings PageSize="8"></GridPageSettings>
+
+    <GridColumns>
+        <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="50" />
+        <GridColumn Field="@nameof(Order.OrderNumber)" HeaderText="Code" Width="120" />
+        <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="250" />
+        <GridColumn HeaderText="Product" Width="250">
+            <Template>
+                @{
+                    var data = context as Order;
+                    @data?.Product?.Description
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+
+
+
+
+
+
+
+
+@* <SfGrid TValue="Order" AllowPaging="true" AllowSorting="true" DataSource="@dataManager">
+    <GridPageSettings PageSize="8"></GridPageSettings>
+
+    <GridColumns>
+        <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="50" />
+        <GridColumn Field="@nameof(Order.OrderNumber)" HeaderText="Code" Width="120" />
+        <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="250" />
+        <GridColumn HeaderText="Product" Width="250">
+            <Template>
+                @{
+                    var data = context as Order;
+                    @data?.Product?.Description
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    private SfDataManager dataManager;
+
+    protected override void OnInitialized()
+    {
+        string apiUrl = "https://localhost:7064/odata/Orders?$expand=Product"; // API URL
+        var customAdaptor = new GenericAuthAdaptor(HttpClientFactory, apiUrl);
+
+        // DataManager içinde adaptörü kullanıyoruz
+        dataManager = new SfDataManager { AdaptorInstance = customAdaptor };
+    }
+} *@
+
+
+@* @page "/orders"
+
+
+
+
+<SfGrid TValue="Order" AllowPaging="true" AllowSorting="true">
+    <SfDataManager Adaptor="Adaptors.ODataV4Adaptor" Url="https://localhost:7064/odata/Orders?$expand=Product">
+    </SfDataManager>
+    <GridPageSettings PageSize="8"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
+        <GridColumn Field="@nameof(Order.OrderNumber)" HeaderText="Code" Width="120" />
+        <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="250" />
+
+        <!-- Template ile iç içe nesneyi göstermek -->
+        <GridColumn HeaderText="Product" Width="250">
+            <Template>
+                @{
+                    var data = context as Order;
+                    @data?.Product?.Description
+                }
+            </Template>
+        </GridColumn>
+
+    </GridColumns>
+    <GridPageSettings PageSize="10"></GridPageSettings>
+</SfGrid>
+ *@

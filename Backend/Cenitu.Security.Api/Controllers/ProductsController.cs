@@ -1,4 +1,5 @@
-﻿using Cenitu.Security.Services.Interfaces;
+﻿using Cenitu.Security.Dtos;
+using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -23,12 +24,13 @@ namespace Cenitu.Security.Api.Controllers
         //    return Ok(productList);
         //}
         //[Authorize(Roles = "Admin")]
-        //[HttpPost("AddProduct")]
-        //public async Task<IActionResult> AddProduct([FromBody] ProductAddDto productAddDto)
-        //{
-        //    var result = await productService.AddProductAsync(productAddDto);
-        //    return Ok(result);
-        //}
+        [HttpPost("AddProduct")]
+        [EnableQuery]
+        public async Task<IActionResult> AddProduct([FromBody] ProductAddDto productAddDto)
+        {
+            var result = await _productService.AddProductAsync(productAddDto);
+            return Ok(result);
+        }
         //[Authorize(Roles = "Admin, User")]
         //[HttpGet("GetProductsPaged")]
         //public async Task<IActionResult> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc")

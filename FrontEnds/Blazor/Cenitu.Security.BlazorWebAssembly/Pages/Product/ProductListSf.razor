@@ -1,24 +1,26 @@
 ﻿@page "/productsListSf"
-
-
-
+@using Cenitu.Security.BlazorWebAssembly.Adaptors
+@using Syncfusion.Blazor.Data
+@using System.Net.Http.Headers
+@inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <SfGrid TValue="ProductListDto" AllowPaging="true" AllowSorting="true">
     <SfDataManager Adaptor="Adaptors.ODataV4Adaptor" Url="https://localhost:7064/odata/Products">
     </SfDataManager>
-    @*     <DataManager Adaptor="Adaptors.CustomAdaptor" CustomAdaptor="@_authAdaptor" /> *@
     <GridPageSettings PageSize="8"></GridPageSettings>
+
     <GridColumns>
         <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
         <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
         <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="250" />
+
     </GridColumns>
-    <GridPageSettings PageSize="10"></GridPageSettings>
 </SfGrid>
-
 @code {
-
-
-   
+    override protected async Task OnInitializedAsync()
+    {
+        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await localStorage.GetItemAsync<string>("accessToken"));
+        await base.OnInitializedAsync();
+    }
 }
-
