@@ -62,7 +62,6 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
 
             }
-            var bok = new AuthenticationState(user);
             return new AuthenticationState(user);
         }
 

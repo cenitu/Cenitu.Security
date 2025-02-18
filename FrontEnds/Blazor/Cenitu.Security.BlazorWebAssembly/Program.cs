@@ -21,7 +21,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 
 
-builder.AddTokenAuthentication();
+builder.AddCookieAuthentication();
 
 builder.Services.AddScoped<AuthWebApiAdaptor>();
 builder.Services.AddScoped(sp => (IAccountManagement)sp.GetRequiredService<AuthenticationStateProvider>());
