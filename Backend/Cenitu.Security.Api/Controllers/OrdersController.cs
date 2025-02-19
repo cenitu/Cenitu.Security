@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Cenitu.Security.Api.Controllers
 {
-    [Route("api/odata/[controller]")]
+    //[Route("api/odata/[controller]")]
     public class OrdersController : ODataController
     {
         private readonly AppDbContext _appDbContext;

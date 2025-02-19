@@ -25,7 +25,7 @@ namespace Cenitu.Security.Api.Controllers
         //}
         //[Authorize(Roles = "Admin")]
         [HttpPost("AddProduct")]
-        [EnableQuery]
+        //[EnableQuery]
         public async Task<IActionResult> AddProduct([FromBody] ProductAddDto productAddDto)
         {
             var result = await _productService.AddProductAsync(productAddDto);

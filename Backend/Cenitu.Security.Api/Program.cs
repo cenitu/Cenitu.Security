@@ -48,6 +48,7 @@ IEdmModel edmModel = odataBuilder.GetEdmModel();
 //}
 
 // 5️⃣ OData Konfigürasyonu
+builder.Services.AddControllers();
 builder.Services.AddControllers()
     .AddOData(opt =>
     {
@@ -78,8 +79,8 @@ builder.Services.AddSwaggerGen(opts =>
     opts.DocInclusionPredicate((docName, apiDesc) =>
     {
         return apiDesc.RelativePath != null &&
-               !apiDesc.RelativePath.StartsWith("odata/$metadata") &&
-               !apiDesc.RelativePath.StartsWith("odata/Products/$count");
+               !apiDesc.RelativePath.StartsWith("odata/$metadata");
+               //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
     });
 
     // 🌟 OData Query Parametrelerini Swagger için tanımla
