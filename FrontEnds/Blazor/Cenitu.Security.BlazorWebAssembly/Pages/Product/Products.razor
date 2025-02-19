@@ -1,0 +1,71 @@
+﻿@page "/products"
+@attribute [Authorize(Roles = "Admin, User")]
+@using Syncfusion.Blazor.Data
+@using System.Net.Http.Headers
+@inject HttpClient HttpClient
+@* @inject Blazored.LocalStorage.ILocalStorageService localStorage *@
+@inject IHttpClientFactory HttpClientFactory
+
+<SfGrid ID="Grid"
+        @ref="DefaultGrid"
+        TValue="ProductListDto"
+        AllowPaging="true"
+        AllowSorting="true"
+        AllowFiltering="true"
+        AllowExcelExport="true"
+        RowHeight="25"
+        
+        Toolbar="@(new List<string>() { "Search", "Add", "Edit", "Delete", "Cancel", "Update", "ExcelExport"})" ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "Edit", "Delete", "Save", "Cancel","PdfExport", "ExcelExport", "CsvExport", "FirstPage", "PrevPage","LastPage", "NextPage"})">
+
+    <GridEditSettings AllowAdding=true AllowEditing=true AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
+
+    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.ODataV4Adaptor" Url="/odata/products"></SfDataManager>
+
+    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto"></GridEvents>
+
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+
+    <GridPageSettings PageSize="8" PageSizes="true" ></GridPageSettings>
+
+    <GridColumns>
+        <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
+        <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
+        <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="250" />
+
+    </GridColumns>
+</SfGrid>
+
+<style>
+    .e-grid .e-headercelldiv {
+        font-size: 12px;
+    }
+
+    .e-grid .e-rowcell {
+        font-size: 12px;
+    }
+</style>
+
+@code {
+    private SfGrid<ProductListDto>? DefaultGrid;
+    private HttpClient? httpClient;
+
+    override protected async Task OnInitializedAsync()
+    {
+        httpClient = HttpClientFactory.CreateClient("Auth");
+        // httpClient.BaseAddress = new Uri("https://localhost:7064/odata");
+        // var defaultRequestHeaders = ttpClient.DefaultRequestHeaders.Authorization;
+        // HttpClient.DefaultRequestHeaders.Authorization = ttpClient.DefaultRequestHeaders.Authorization;
+        // HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await localStorage.GetItemAsync<string>("accessToken"));
+
+
+        await base.OnInitializedAsync();
+    }
+
+    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id == "Grid_excelexport") //Id is combination of Grid's ID and itemname
+        {
+            await this.DefaultGrid.ExportToExcelAsync();
+        }
+    }
+}

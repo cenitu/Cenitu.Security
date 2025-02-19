@@ -1,6 +1,5 @@
 ﻿@page "/orders"
-@using Cenitu.Security.BlazorWebAssembly.Adaptors
-
+@attribute [Authorize(Roles = "Admin, User")]
 
 <SfGrid TValue="Order" AllowPaging="true">
     <SfDataManager Url="https://localhost:7064/odata/Orders?$expand=Product" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
