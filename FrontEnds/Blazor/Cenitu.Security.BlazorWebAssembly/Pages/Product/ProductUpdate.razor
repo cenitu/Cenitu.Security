@@ -1,0 +1,66 @@
+﻿@page "/product/update/{Id}"
+@inject IProductManager productManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<h3>Update Product</h3>
+<a class="btn btn-primary" href="products">Back</a>
+
+@if (product != null)
+{
+    <div class="flex-outer">
+        <div class="mb-3">
+            <label class="form-label" for="Id">Id</label>
+            <input type="text" class="form-control" value="@product.Id" readonly id="Id" name="idInput" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="Code">Code</label>
+            <input type="text" class="form-control" @bind="product.Code" autofocus autocomplete="on" required id="Code" name="codeInput" placeholder="Enter Product Code" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="Description">Description</label>
+            <input type="text" class="form-control" @bind="product.Description" autocomplete="on" required id="Description" name="descriptionInput" placeholder="Enter Product Description" />
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-primary" @onclick="UpdateProductAsync">Update</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private ProductListDto product;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await productManager.GetProductAsync(Id);
+        if (product == null)
+        {
+            NavigationManager.NavigateTo("products");
+        }
+    }
+
+    public async Task UpdateProductAsync()
+    {
+        try
+        {
+            await productManager.UpdateProductAsync(product);
+            NavigationManager.NavigateTo("products");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating product: {ex.Message}";
+        }
+    }
+}

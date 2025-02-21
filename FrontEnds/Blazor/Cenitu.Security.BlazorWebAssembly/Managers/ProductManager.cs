@@ -36,5 +36,17 @@ namespace Cenitu.Security.BlazorWebAssembly.Managers
                 PageIndex = page
             };
         }
+
+        public async Task<ProductListDto> GetProductAsync(string Id)
+        {
+            return await httpClient.GetFromJsonAsync<ProductListDto>($"api/Products/GetProduct?Id={Id}") ?? new ProductListDto();
+        }
+
+        public async Task<ProductListDto> UpdateProductAsync(ProductListDto productDto)
+        {
+            var response = await httpClient.PutAsJsonAsync("api/Products/UpdateProduct", productDto);
+            return await response.Content.ReadFromJsonAsync<ProductListDto>() ?? new ProductListDto();
+        }
+
     }
 }

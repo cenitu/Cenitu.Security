@@ -1,4 +1,5 @@
-﻿using Cenitu.Security.Dtos;
+﻿using Cenitu.Security.Domain.Entities;
+using Cenitu.Security.Dtos;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Cenitu.Security.Api.Controllers
 {
-    [Route("api/odata/[controller]")]
+
     public class ProductsController : ODataController
     {
         private readonly IProductService _productService;
@@ -24,12 +25,25 @@ namespace Cenitu.Security.Api.Controllers
         //    return Ok(productList);
         //}
         //[Authorize(Roles = "Admin")]
-        [HttpPost("AddProduct")]
-        //[EnableQuery]
+        //[HttpPost("AddProduct")]
+        [HttpPost("api/Products/AddProduct")]
         public async Task<IActionResult> AddProduct([FromBody] ProductAddDto productAddDto)
         {
             var result = await _productService.AddProductAsync(productAddDto);
             return Ok(result);
+        }
+
+        [HttpPut("api/Products/UpdateProduct")]
+        public async Task<IActionResult> UpdateProduct([FromBody] ProductListDto productDto)
+        {
+            var result = await _productService.UpdateProductAsync(productDto);
+            return Ok(result);
+        }
+        [HttpGet("api/Products/GetProduct")]
+        public async Task<ProductListDto> GetProduct(int Id)
+        {
+            var result = await _productService.GetProductAsync(Id);
+            return result;
         }
         //[Authorize(Roles = "Admin, User")]
         //[HttpGet("GetProductsPaged")]
@@ -59,9 +73,10 @@ namespace Cenitu.Security.Api.Controllers
         //}
         [Authorize(Roles = "Admin, User")]
         [EnableQuery]
-        [HttpGet]
+     
         public IActionResult Get()
         {
+
             var products = _productService.Get();
             
             return Ok(products);

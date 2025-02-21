@@ -26,10 +26,14 @@ namespace Cenitu.Security.Services.Services
             this.mapper = mapper;
         }
 
-        public async Task<List<ProductListDto>> GetProductsAsync()
+        public async Task<ProductListDto> GetProductAsync(int Id)
         {
-            var productList = await context.Products.ToListAsync();
-            return mapper.Map<List<ProductListDto>>(productList);
+            var product = await context.Products.Include(x => x.ProductUnits)!.ThenInclude(x => x.Unit).Where(x => x.Id == Id).FirstOrDefaultAsync();
+            if (product == null)
+            {
+                throw new Exception("Product not found");
+            }
+            return mapper.Map<ProductListDto>(product);
         }
 
         public async Task<ProductAddDto> AddProductAsync(ProductAddDto productAddDto)
@@ -44,51 +48,34 @@ namespace Cenitu.Security.Services.Services
             return mapper.Map<ProductAddDto>(product);
         }
 
-        public async Task<PagedAndSortedResult<ProductListDto>> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc")
+
+        public async Task<ProductListDto> UpdateProductAsync(ProductListDto productDto)
         {
-            var query = context.Products.AsQueryable();
-
-            // Sıralama Uygula
-            query = sortColumn.ToLower() switch
+            var product = await context.Products.FirstOrDefaultAsync(x => x.Id == productDto.Id);
+            if (product == null)
             {
-                "code" => sortDirection == "asc" ? query.OrderBy(p => p.Code) : query.OrderByDescending(p => p.Code),
-                "description" => sortDirection == "asc" ? query.OrderBy(p => p.Description) : query.OrderByDescending(p => p.Description),
-                _ => sortDirection == "asc" ? query.OrderBy(p => p.Id) : query.OrderByDescending(p => p.Id)
-            };
+                throw new Exception("Product not found");
+            }
 
-            // Toplam kayıt sayısını al
-            var totalCount = await query.CountAsync();
+            // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
+            mapper.Map(productDto, product);
 
-            // Sayfalama uygula
-            var products = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ProductListDto
-                {
-                    Id = p.Id,
-                    Code = p.Code,
-                    Description = p.Description
-                })
-                .ToListAsync();
-
-
-
-
-            // Sayfalama sonucu döndür
-            var pagedAndSortedList = new PagedAndSortedResult<ProductListDto>
+            // Değişiklikleri kaydet
+            var result = await context.SaveChangesAsync();
+            if (result == 0)
             {
-                Data = products,
-                TotalCount = totalCount,
-                PageIndex = page,
-                PageSize = pageSize
+                throw new Exception("Product not updated");
+            }
 
-            };
-            return pagedAndSortedList;
+            // Güncellenmiş haliyle geri dön
+            return mapper.Map<ProductListDto>(product);
         }
 
         public IQueryable<Product> Get()
         {
             return context.Products;
         }
+
+
     }
 }

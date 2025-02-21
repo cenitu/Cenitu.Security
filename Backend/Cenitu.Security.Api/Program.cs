@@ -35,6 +35,7 @@ builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 ODataConventionModelBuilder odataBuilder = new ODataConventionModelBuilder();
 odataBuilder.EntitySet<Product>("Products"); // OData için "Products" entity'si
 odataBuilder.EntitySet<Order>("Orders"); // OData için "Orders" entity'si
+odataBuilder.EntitySet<ProductUnit>("ProductUnits"); // OData için "ProductUnits" entity'si
 
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 

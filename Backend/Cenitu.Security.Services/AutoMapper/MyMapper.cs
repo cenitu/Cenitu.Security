@@ -15,6 +15,9 @@ namespace Cenitu.Security.Services.AutoMapper
         {
             CreateMap<Product, ProductListDto>().ReverseMap();
             CreateMap<Product, ProductAddDto>().ReverseMap();
+            CreateMap<Unit,UnitDto>().ReverseMap();
+            CreateMap<ProductUnit, ProductUnitDto>().ReverseMap();
+
         }
     }
 }

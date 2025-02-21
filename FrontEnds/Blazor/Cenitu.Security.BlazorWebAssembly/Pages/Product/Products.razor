@@ -1,11 +1,15 @@
 ﻿@page "/products"
 @attribute [Authorize(Roles = "Admin, User")]
+@using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Data
 @using System.Net.Http.Headers
 @inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
 @* @inject Blazored.LocalStorage.ILocalStorageService localStorage *@
 @inject IHttpClientFactory HttpClientFactory
-
+<SfButton @onclick="Add"> Add </SfButton>
+<SfButton @onclick="Update"> Update - 1001 </SfButton>
+<SfButton @onclick="Delete"> Delete the selected row </SfButton>
 <SfGrid ID="Grid"
         @ref="DefaultGrid"
         TValue="ProductListDto"
@@ -13,35 +17,43 @@
         AllowSorting="true"
         AllowFiltering="true"
         AllowExcelExport="true"
+        AllowReordering="true"
         RowHeight="25"
-        
         Toolbar="@(new List<string>() { "Search", "Add", "Edit", "Delete", "Cancel", "Update", "ExcelExport"})" ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "Edit", "Delete", "Save", "Cancel","PdfExport", "ExcelExport", "CsvExport", "FirstPage", "PrevPage","LastPage", "NextPage"})">
 
-    <GridEditSettings AllowAdding=true AllowEditing=true AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
+    <GridEditSettings AllowAdding=true AllowEditing=false AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
 
-    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.ODataV4Adaptor" Url="/odata/products"></SfDataManager>
+    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.ODataV4Adaptor" Url="/odata/products?$expand=productunits($expand=unit)"></SfDataManager>
 
-    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto"></GridEvents>
+    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto" OnRecordDoubleClick="Update"></GridEvents>
 
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
 
-    <GridPageSettings PageSize="8" PageSizes="true" ></GridPageSettings>
+    <GridPageSettings PageSize="20" PageSizes="true"></GridPageSettings>
 
     <GridColumns>
-        <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
+        <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
         <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
         <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="250" />
+        <GridColumn HeaderText="Unit" Width="30">
+            <Template>
+                @{
+                    var data = context as ProductListDto;
+                    @data?.PrimaryUnitSymbol
+                }
+            </Template>
+        </GridColumn>
 
     </GridColumns>
 </SfGrid>
 
 <style>
     .e-grid .e-headercelldiv {
-        font-size: 12px;
+        font-size: 14px;
     }
 
     .e-grid .e-rowcell {
-        font-size: 12px;
+        font-size: 14px;
     }
 </style>
 
@@ -67,5 +79,21 @@
         {
             await this.DefaultGrid.ExportToExcelAsync();
         }
+    }
+    private void Add()
+    {
+        NavigationManager.NavigateTo("product/create");
+    }
+    private void Update()
+    {
+        var id = DefaultGrid!.SelectedRecords.FirstOrDefault()?.Id;
+        if (id != null)
+        {
+            NavigationManager.NavigateTo($"product/update/{id}");
+        }
+    }
+    private void Delete(MouseEventArgs e)
+    {
+        throw new NotImplementedException();
     }
 }

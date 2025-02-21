@@ -1,7 +1,16 @@
 ﻿@page "/orders"
 @attribute [Authorize(Roles = "Admin, User")]
 
-<SfGrid TValue="Order" AllowPaging="true">
+<SfGrid TValue="Order"
+        AllowPaging="true"
+        AllowSorting="true"
+        AllowFiltering="true"
+        AllowExcelExport="true"
+        AllowReordering="true"
+        RowHeight="25"
+        Toolbar="@(new List<string>() { "Search", "Add", "Edit", "Delete", "Cancel", "Update", "ExcelExport"})" ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "Edit", "Delete", "Save", "Cancel","PdfExport", "ExcelExport", "CsvExport", "FirstPage", "PrevPage","LastPage", "NextPage"})">
+
+    <GridEditSettings AllowAdding=true AllowEditing=true AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
     <SfDataManager Url="https://localhost:7064/odata/Orders?$expand=Product" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
     <GridPageSettings PageSize="8"></GridPageSettings>
 
