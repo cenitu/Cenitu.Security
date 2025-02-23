@@ -1,5 +1,6 @@
 ﻿using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace Cenitu.Security.Api.Controllers
         //[Authorize(Roles = "Admin")]
         //[HttpPost("AddProduct")]
         [HttpPost("api/Products/AddProduct")]
-        public async Task<IActionResult> AddProduct([FromBody] ProductAddDto productAddDto)
+        public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productAddDto)
         {
             var result = await _productService.AddProductAsync(productAddDto);
             return Ok(result);

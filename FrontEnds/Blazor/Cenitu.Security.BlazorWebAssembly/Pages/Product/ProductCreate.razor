@@ -1,4 +1,4 @@
-﻿@page "/product/create"
+﻿@page "/product/createold"
 @inject IProductManager productManager
 @inject NavigationManager NavigationManager
 @attribute [Authorize(Roles = "Admin")]
@@ -15,7 +15,6 @@
         <input type="text" class="form-control" @bind="product.Description" autofocus autocomplete="on" required id="Description" name="descriptionInput" placeholder="Enter Product Description" />
     </div>
     <div class="mb-3">
-        <Syncfusion.Blazor.DropDowns.SfDropDownBase
     </div>
     <div class="mb-3">
         <button class="btn btn-primary" @onclick="AddProductAsync">Add</button>

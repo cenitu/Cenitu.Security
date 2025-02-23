@@ -23,26 +23,21 @@
 
     <GridEditSettings AllowAdding=true AllowEditing=false AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
 
-    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.ODataV4Adaptor" Url="/odata/products?$expand=productunits($expand=unit)"></SfDataManager>
+@*     <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/odata/products?$expand=productunits($expand=unit)"></SfDataManager> *@
+    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/api/productss"></SfDataManager>
 
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto" OnRecordDoubleClick="Update"></GridEvents>
 
-    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
-
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
     <GridPageSettings PageSize="20" PageSizes="true"></GridPageSettings>
 
     <GridColumns>
         <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
-        <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
-        <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="250" />
-        <GridColumn HeaderText="Unit" Width="30">
-            <Template>
-                @{
-                    var data = context as ProductListDto;
-                    @data?.PrimaryUnitSymbol
-                }
-            </Template>
-        </GridColumn>
+        <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Kodu" Width="120" />
+        <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Açıklaması" Width="250" />
+
+        <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Birim" Width="250" />
+
 
     </GridColumns>
 </SfGrid>

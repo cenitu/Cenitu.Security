@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Cenitu.Security.Dtos
 {
-   public class ProductAddDto
+    public class ApiResponse<T> where T : class
     {
-        public string Code { get; set; }
-        public string Description { get; set; }
-
         
+        public List<T> Items { get; set; }
+        public int Count { get; set; }
     }
 }

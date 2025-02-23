@@ -1,4 +1,5 @@
 ﻿using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Product;
 using System.Net.Http.Json;
 
 namespace Cenitu.Security.BlazorWebAssembly.Managers
@@ -14,6 +15,11 @@ namespace Cenitu.Security.BlazorWebAssembly.Managers
             
         }
         public async Task<ProductAddDto> AddProductAsync(ProductAddDto productAddDto)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Products/AddProduct", productAddDto);
+            return await response.Content.ReadFromJsonAsync<ProductAddDto>() ?? new ProductAddDto();
+        }
+        public async Task<ProductAddDto> AddProductAsync(ProductCreateDto productAddDto)
         {
             var response = await httpClient.PostAsJsonAsync("api/Products/AddProduct", productAddDto);
             return await response.Content.ReadFromJsonAsync<ProductAddDto>() ?? new ProductAddDto();

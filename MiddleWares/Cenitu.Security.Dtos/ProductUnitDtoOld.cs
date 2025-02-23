@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cenitu.Security.Dtos.Unit;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Cenitu.Security.Dtos
 {
-    public class ProductUnitDto
+    public class ProductUnitDtoOld
     {
         public int ProductId { get; set; }
         public int UnitId { get; set; }

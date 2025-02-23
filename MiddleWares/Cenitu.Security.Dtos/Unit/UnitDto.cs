@@ -1,4 +1,4 @@
-﻿namespace Cenitu.Security.Dtos
+﻿namespace Cenitu.Security.Dtos.Unit
 {
     public class UnitDto
     {

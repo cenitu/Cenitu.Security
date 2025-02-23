@@ -6,6 +6,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
 	</PropertyGroup>
+	<PropertyGroup>
+		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -13,6 +16,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.2" />
 		<PackageReference Include="Radzen.Blazor" Version="6.0.6" />
 		<PackageReference Include="Syncfusion.Blazor.Grid" Version="28.2.5" />
 		<PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.5" />
@@ -32,12 +36,21 @@
 	    <AutoGen>True</AutoGen>
 	    <DependentUpon>SfResources.resx</DependentUpon>
 	  </Compile>
+	  <Compile Update="Resources\Shared.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Shared.resx</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Update="Resources\SfResources.resx">
 	    <Generator>PublicResXFileCodeGenerator</Generator>
 	    <LastGenOutput>SfResources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Shared.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Shared.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
 

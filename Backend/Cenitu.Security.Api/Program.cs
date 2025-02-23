@@ -29,6 +29,7 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opts => { })
 // 3️⃣ Servisleri Bağla
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 
 //// 4️⃣ OData Modeli Tanımlama
@@ -51,6 +52,7 @@ IEdmModel edmModel = odataBuilder.GetEdmModel();
 // 5️⃣ OData Konfigürasyonu
 builder.Services.AddControllers();
 builder.Services.AddControllers()
+    
     .AddOData(opt =>
     {
         opt.AddRouteComponents("odata", edmModel) // "api/odata" yerine "odata" route kullanıldı
@@ -74,14 +76,14 @@ builder.Services.AddSwaggerGen(opts =>
         Type = SecuritySchemeType.ApiKey
     });
 
-    opts.OperationFilter<SecurityRequirementsOperationFilter>();
+    opts.OperationFilter<SecurityRequirementsOperationFilter>(opts => { });
 
     // 🌟 OData endpoint çakışmasını önlemek için belirli yolları hariç tut
     opts.DocInclusionPredicate((docName, apiDesc) =>
     {
         return apiDesc.RelativePath != null &&
                !apiDesc.RelativePath.StartsWith("odata/$metadata");
-               //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
+        //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
     });
 
     // 🌟 OData Query Parametrelerini Swagger için tanımla
