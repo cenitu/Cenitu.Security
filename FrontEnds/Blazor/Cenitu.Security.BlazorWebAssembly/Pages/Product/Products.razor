@@ -7,6 +7,8 @@
 @inject NavigationManager NavigationManager
 @* @inject Blazored.LocalStorage.ILocalStorageService localStorage *@
 @inject IHttpClientFactory HttpClientFactory
+
+
 <SfButton @onclick="Add"> Add </SfButton>
 <SfButton @onclick="Update"> Update - 1001 </SfButton>
 <SfButton @onclick="Delete"> Delete the selected row </SfButton>
@@ -24,7 +26,7 @@
     <GridEditSettings AllowAdding=true AllowEditing=false AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
 
 @*     <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/odata/products?$expand=productunits($expand=unit)"></SfDataManager> *@
-    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/api/productss"></SfDataManager>
+    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/api/products/getproducts"></SfDataManager>
 
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto" OnRecordDoubleClick="Update"></GridEvents>
 

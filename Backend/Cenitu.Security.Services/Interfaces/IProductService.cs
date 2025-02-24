@@ -12,9 +12,8 @@ namespace Cenitu.Security.Services.Interfaces
     public interface IProductService
     {
         Task<ProductCreateDto> AddProductAsync(ProductCreateDto productCreateDto);
-        IQueryable<Product> Get();
         Task<ProductListDto> GetProductAsync(int Id);
-        Task<ApiResponse<ProductListDto>> GetProducts(int skip, int top, string? filter, string? orderby);
-        Task<ProductListDto> UpdateProductAsync(ProductListDto productDto);
+        Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int top, string? filter, string? orderby);
+        Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productDto);
     }
 }

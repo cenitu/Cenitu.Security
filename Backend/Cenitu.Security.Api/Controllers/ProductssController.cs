@@ -23,7 +23,7 @@ namespace Cenitu.Security.Api.Controllers
             [FromQuery(Name ="$filter")] string? filter,
             [FromQuery(Name ="$orderby")] string? orderby)
         {
-            var productList =await  _productService.GetProducts(skip, top, filter,orderby);
+            var productList =await  _productService.GetProductsAsync(skip, top, filter,orderby);
             return Ok(productList);
         }
     }

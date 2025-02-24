@@ -33,12 +33,12 @@ builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 
 //// 4️⃣ OData Modeli Tanımlama
-ODataConventionModelBuilder odataBuilder = new ODataConventionModelBuilder();
-odataBuilder.EntitySet<Product>("Products"); // OData için "Products" entity'si
-odataBuilder.EntitySet<Order>("Orders"); // OData için "Orders" entity'si
-odataBuilder.EntitySet<ProductUnit>("ProductUnits"); // OData için "ProductUnits" entity'si
+//ODataConventionModelBuilder odataBuilder = new ODataConventionModelBuilder();
+//odataBuilder.EntitySet<Product>("Products"); // OData için "Products" entity'si
+//odataBuilder.EntitySet<Order>("Orders"); // OData için "Orders" entity'si
+//odataBuilder.EntitySet<ProductUnit>("ProductUnits"); // OData için "ProductUnits" entity'si
 
-IEdmModel edmModel = odataBuilder.GetEdmModel();
+//IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 //static IEdmModel GetEdmModel()
 //{
@@ -51,20 +51,20 @@ IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 // 5️⃣ OData Konfigürasyonu
 builder.Services.AddControllers();
-builder.Services.AddControllers()
+//builder.Services.AddControllers()
     
-    .AddOData(opt =>
-    {
-        opt.AddRouteComponents("odata", edmModel) // "api/odata" yerine "odata" route kullanıldı
-            .Select()
-            .Expand()
-            .Filter()
-            .OrderBy()
-            .SetMaxTop(100) // Maksimum veri limiti
-            .Count()
-            .Expand()
-            ;
-    });
+    //.AddOData(opt =>
+    //{
+    //    opt.AddRouteComponents("odata", edmModel) // "api/odata" yerine "odata" route kullanıldı
+    //        .Select()
+    //        .Expand()
+    //        .Filter()
+    //        .OrderBy()
+    //        .SetMaxTop(100) // Maksimum veri limiti
+    //        .Count()
+    //        .Expand()
+    //        ;
+    //});
 
 // 6️⃣ Swagger Ayarları (OData ile uyumlu hale getir)
 builder.Services.AddSwaggerGen(opts =>
@@ -76,18 +76,18 @@ builder.Services.AddSwaggerGen(opts =>
         Type = SecuritySchemeType.ApiKey
     });
 
-    opts.OperationFilter<SecurityRequirementsOperationFilter>(opts => { });
+    opts.OperationFilter<SecurityRequirementsOperationFilter>();
 
-    // 🌟 OData endpoint çakışmasını önlemek için belirli yolları hariç tut
-    opts.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        return apiDesc.RelativePath != null &&
-               !apiDesc.RelativePath.StartsWith("odata/$metadata");
-        //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
-    });
+    //// 🌟 OData endpoint çakışmasını önlemek için belirli yolları hariç tut
+    //opts.DocInclusionPredicate((docName, apiDesc) =>
+    //{
+    //    return apiDesc.RelativePath != null &&
+    //           !apiDesc.RelativePath.StartsWith("odata/$metadata");
+    //    //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
+    //});
 
-    // 🌟 OData Query Parametrelerini Swagger için tanımla
-    opts.OperationFilter<ODataQueryOptionsFilter>();
+    //// 🌟 OData Query Parametrelerini Swagger için tanımla
+    //opts.OperationFilter<ODataQueryOptionsFilter>();
 });
 
 // 7️⃣ CORS Ayarları

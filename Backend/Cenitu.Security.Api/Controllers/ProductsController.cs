@@ -9,14 +9,28 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Cenitu.Security.Api.Controllers
 {
-
-    public class ProductsController : ODataController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
 
         public ProductsController(IProductService productService)
         {
             _productService = productService;
+        }
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet("GetProducts")]
+        public async Task<IActionResult> GetProductsAsync(
+            [FromQuery(Name = "$inlinecount")] string inlinecount,
+            [FromQuery(Name = "$skip")] int skip,
+            [FromQuery(Name = "$top")] int top,
+            [FromQuery(Name = "$filter")] string? filter,
+            [FromQuery(Name = "$orderby")] string? orderby)
+        {
+            var productList = await _productService.GetProductsAsync(skip, top, filter, orderby);
+            return Ok(productList);
         }
         //[Authorize(Roles = "Admin, User")]
         //[HttpGet("GetProducts")]
@@ -27,60 +41,27 @@ namespace Cenitu.Security.Api.Controllers
         //}
         //[Authorize(Roles = "Admin")]
         //[HttpPost("AddProduct")]
-        [HttpPost("api/Products/AddProduct")]
+        [HttpPost("AddProduct")]
         public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productAddDto)
         {
             var result = await _productService.AddProductAsync(productAddDto);
             return Ok(result);
         }
 
-        [HttpPut("api/Products/UpdateProduct")]
-        public async Task<IActionResult> UpdateProduct([FromBody] ProductListDto productDto)
+        [HttpPut("UpdateProduct")]
+        public async Task<IActionResult> UpdateProductAsync([FromBody] ProductUpdateDto productUpdateDto)
         {
-            var result = await _productService.UpdateProductAsync(productDto);
+            var result = await _productService.UpdateProductAsync(productUpdateDto);
             return Ok(result);
         }
-        [HttpGet("api/Products/GetProduct")]
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet("GetProduct")]
         public async Task<ProductListDto> GetProduct(int Id)
         {
             var result = await _productService.GetProductAsync(Id);
             return result;
         }
-        //[Authorize(Roles = "Admin, User")]
-        //[HttpGet("GetProductsPaged")]
-        //public async Task<IActionResult> GetProductsPaged(int page = 1, int pageSize = 10, string sortColumn = "Id", string sortDirection = "asc")
-        //{
-        //    var products = await productService.GetProductsPaged(page, pageSize, sortColumn, sortDirection);
-        //    var jsonProducts = JsonSerializer.Serialize(products);  
-        //    return Ok(products  );
-        //}
-        //[Authorize(Roles = "Admin, User")]
-        //[HttpGet("GetPagedData")]
-
-        //public async Task<IActionResult> GetPagedData([FromQuery] int skip = 0, [FromQuery] int take = 10)
-        //{
-        //    // totalCount
-        //    var result = await productService.GetProductsPaged(skip, take);
-        //    var list = result.Data;
-        //    var totalCount = result.TotalCount;
-
-
-        //    // Syncfusion'a uygun json => { result, count }
-        //    return Ok(new
-        //    {
-        //        result = list,
-        //        count = totalCount,
-        //    });
-        //}
-        [Authorize(Roles = "Admin, User")]
-        [EnableQuery]
-     
-        public IActionResult Get()
-        {
-
-            var products = _productService.Get();
-            
-            return Ok(products);
-        }
+        
+  
     }
 }

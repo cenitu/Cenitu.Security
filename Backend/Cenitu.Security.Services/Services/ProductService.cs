@@ -46,16 +46,16 @@ namespace Cenitu.Security.Services.Services
         }
 
 
-        public async Task<ProductListDto> UpdateProductAsync(ProductListDto productDto)
+        public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto produtUpdateDto)
         {
-            var product = await context.Products.FirstOrDefaultAsync(x => x.Id == productDto.Id);
+            var product = await context.Products.FirstOrDefaultAsync(x => x.Id == produtUpdateDto.Id);
             if (product == null)
             {
                 throw new Exception("Product not found");
             }
 
             // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
-            mapper.Map(productDto, product);
+            mapper.Map(produtUpdateDto, product);
 
             // Değişiklikleri kaydet
             var result = await context.SaveChangesAsync();
@@ -64,15 +64,11 @@ namespace Cenitu.Security.Services.Services
                 throw new Exception("Product not updated");
             }
 
-            // Güncellenmiş haliyle geri dön
-            return mapper.Map<ProductListDto>(product);
+            // Güncellenmiş haliyle geri dön    
+            return mapper.Map<ProductUpdateDto>(product);
         }
-        public IQueryable<Product> Get()
-        {
-            return context.Products.Include(x => x.ProductUnits);
-        }
-
-        public async Task<ApiResponse<ProductListDto>> GetProducts(int skip, int top, string? filter, string? orderby)
+       
+        public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int top, string? filter, string? orderby)
         {
             var query = context.Products.Include(x => x.ProductUnits).ThenInclude(x => x.Unit).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
