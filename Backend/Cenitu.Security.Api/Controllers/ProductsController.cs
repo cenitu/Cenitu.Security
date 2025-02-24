@@ -23,13 +23,17 @@ namespace Cenitu.Security.Api.Controllers
         [Authorize(Roles = "Admin, User")]
         [HttpGet("GetProducts")]
         public async Task<IActionResult> GetProductsAsync(
-            [FromQuery(Name = "$inlinecount")] string inlinecount,
+            [FromQuery(Name = "$inlinecount")] string? inlinecount,
             [FromQuery(Name = "$skip")] int skip,
-            [FromQuery(Name = "$top")] int top,
+            [FromQuery(Name = "$top")] int? top,
             [FromQuery(Name = "$filter")] string? filter,
             [FromQuery(Name = "$orderby")] string? orderby)
         {
             var productList = await _productService.GetProductsAsync(skip, top, filter, orderby);
+            if (inlinecount==null)
+            {
+                return Ok(productList.Items);
+            }
             return Ok(productList);
         }
         //[Authorize(Roles = "Admin, User")]
@@ -56,7 +60,7 @@ namespace Cenitu.Security.Api.Controllers
         }
         [Authorize(Roles = "Admin, User")]
         [HttpGet("GetProduct")]
-        public async Task<ProductListDto> GetProduct(int Id)
+        public async Task<ProductUpdateDto> GetProduct(int Id)
         {
             var result = await _productService.GetProductAsync(Id);
             return result;

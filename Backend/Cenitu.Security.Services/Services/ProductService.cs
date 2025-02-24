@@ -21,14 +21,14 @@ namespace Cenitu.Security.Services.Services
             this.mapper = mapper;
         }
 
-        public async Task<ProductListDto> GetProductAsync(int Id)
+        public async Task<ProductUpdateDto> GetProductAsync(int Id)
         {
             var product = await context.Products.Include(x => x.ProductUnits)!.ThenInclude(x => x.Unit).Where(x => x.Id == Id).FirstOrDefaultAsync();
             if (product == null)
             {
                 throw new Exception("Product not found");
             }
-            return mapper.Map<ProductListDto>(product);
+            return mapper.Map<ProductUpdateDto>(product);
         }
 
         public async Task<ProductCreateDto> AddProductAsync(ProductCreateDto productCreateDto)
@@ -46,17 +46,25 @@ namespace Cenitu.Security.Services.Services
         }
 
 
-        public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto produtUpdateDto)
+        public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productUpdateDto)
         {
-            var product = await context.Products.FirstOrDefaultAsync(x => x.Id == produtUpdateDto.Id);
+            var product = await context.Products.Include(x => x.ProductUnits).ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
             if (product == null)
             {
                 throw new Exception("Product not found");
             }
 
             // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
-            mapper.Map(produtUpdateDto, product);
-
+            mapper.Map(productUpdateDto, product);
+            //var productToUpdate = mapper.Map<Product>(productUpdateDto);
+            product.ProductUnits = productUpdateDto.ProductUnits.Select(pu => new ProductUnit
+            {
+                ProductId = product.Id,
+                UnitId = pu.UnitId,
+                IsPrimary = pu.IsPrimary,
+                ConversionFactor = pu.ConversionFactor
+            }).ToList();
+            //context.Products.Update(productToUpdate);
             // Değişiklikleri kaydet
             var result = await context.SaveChangesAsync();
             if (result == 0)
@@ -66,9 +74,11 @@ namespace Cenitu.Security.Services.Services
 
             // Güncellenmiş haliyle geri dön    
             return mapper.Map<ProductUpdateDto>(product);
+
+            //return productUpdateDto;
         }
-       
-        public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int top, string? filter, string? orderby)
+
+        public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
         {
             var query = context.Products.Include(x => x.ProductUnits).ThenInclude(x => x.Unit).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
@@ -107,7 +117,12 @@ namespace Cenitu.Security.Services.Services
 
             }
             var count = await query.CountAsync();
-            var products = await query.Skip(skip).Take(top).ToListAsync();
+            query = query.Skip(skip);
+            if (top.HasValue)
+            {
+                query = query.Take(top.Value);
+            }
+            var products = await query.ToListAsync();
             var productListDto = mapper.Map<List<ProductListDto>>(products);
             return new ApiResponse<ProductListDto>
             {

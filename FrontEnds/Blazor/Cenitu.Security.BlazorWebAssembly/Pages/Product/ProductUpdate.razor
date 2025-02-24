@@ -1,66 +1,181 @@
-﻿@page "/product/update/{Id}"
+﻿@page "/product/update/{id:int}"
+@using Cenitu.Security.Dtos.Product
+@using Cenitu.Security.Dtos.Unit
 @inject IProductManager productManager
+@inject IHttpClientFactory HttpClientFactory
+@inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Update Product</h3>
-<a class="btn btn-primary" href="products">Back</a>
+<h3 class="text-center mt-4 text-primary">Update Product</h3>
 
-@if (product != null)
-{
-    <div class="flex-outer">
-        <div class="mb-3">
-            <label class="form-label" for="Id">Id</label>
-            <input type="text" class="form-control" value="@product.Id" readonly id="Id" name="idInput" />
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label" for="Code">Product Code</label>
+                <input type="text" class="form-control" @bind="product.Code" required id="Code" name="codeInput" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Description">Product Description</label>
+                <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label" for="Code">Code</label>
-            <input type="text" class="form-control" @bind="product.Code" autofocus autocomplete="on" required id="Code" name="codeInput" placeholder="Enter Product Code" />
+
+        <hr class="my-4" />
+
+        <h4 class="text-center text-secondary">Product Units</h4>
+        <div class="row">
+            <div class="col-md-5">
+                <label class="form-label">Select Unit</label>
+                <select class="form-control" @bind="selectedUnitId">
+                    <option value="">-- Select a Unit --</option>
+                    @foreach (var unit in availableUnits)
+                    {
+                        <option value="@unit.Id">@unit.Symbol</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-success w-100" @onclick="AddUnit">Add Unit</button>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label" for="Description">Description</label>
-            <input type="text" class="form-control" @bind="product.Description" autocomplete="on" required id="Description" name="descriptionInput" placeholder="Enter Product Description" />
-        </div>
-        <div class="mb-3">
-            <button class="btn btn-primary" @onclick="UpdateProductAsync">Update</button>
+
+        @if (product.ProductUnits.Any())
+        {
+            <table class="table table-hover table-bordered mt-4 text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Primary</th>
+                        <th>Unit</th>
+                        <th>Conversion Factor</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var unit in product.ProductUnits)
+                    {
+                        <tr>
+                            <td>
+                                <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" />
+                            </td>
+                            <td>@unit.UnitSymbol</td>
+                            <td>
+                                <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" />
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveUnit(unit)">❌ Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <div class="d-flex justify-content-between mt-4">
+            <a class="btn btn-outline-secondary" href="products">⬅ Back</a>
+            <button class="btn btn-primary px-4" @onclick="UpdateProductAsync">✅ Update Product</button>
         </div>
     </div>
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger">@errorMessage</div>
-    }
-}
-else
-{
-    <p>Loading...</p>
-}
+</div>
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
-    private ProductListDto product;
-    private string errorMessage;
+    [Parameter] public int Id { get; set; }
+    private ProductUpdateDto product = new ProductUpdateDto();
+    private List<UnitDto> availableUnits = new();
+    private List<UnitDto> allUnits = new();
+    private int? selectedUnitId;
 
     protected override async Task OnInitializedAsync()
     {
-        product = await productManager.GetProductAsync(Id);
-        if (product == null)
+        HttpClient = HttpClientFactory.CreateClient("Auth");
+
+        // Mevcut ürün bilgilerini API'den çek
+        product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"api/Products/GetProduct?Id={Id}") ?? new();
+
+        // Mevcut tüm birimleri çek
+        allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("api/units")) ?? [];
+
+        // Kullanılmayan birimleri listeye ekle
+        availableUnits = allUnits.Where(u => !product.ProductUnits.Any(pu => pu.UnitId == u.Id)).ToList();
+    }
+
+    private void AddUnit()
+    {
+        if (selectedUnitId == null || selectedUnitId == 0)
+            return;
+
+        var selectedUnit = availableUnits.FirstOrDefault(u => u.Id == selectedUnitId);
+        if (selectedUnit == null)
+            return;
+
+        if (product.ProductUnits.Any(pu => pu.UnitId == selectedUnit.Id))
+            return;
+
+        bool isPrimary = product.ProductUnits.Count == 0;
+
+        if (isPrimary)
         {
-            NavigationManager.NavigateTo("products");
+            foreach (var unit in product.ProductUnits)
+            {
+                unit.IsPrimary = false;
+            }
+        }
+
+        product.ProductUnits.Add(new ProductUnitDtoForUpdate
+            {
+                ProductId = product.Id,
+                UnitId = selectedUnit.Id,
+                UnitSymbol = selectedUnit.Symbol,
+                ConversionFactor = 1.0M,
+                IsPrimary = isPrimary
+            });
+
+        availableUnits.Remove(selectedUnit);
+        selectedUnitId = null;
+    }
+
+    private void RemoveUnit(ProductUnitDtoForUpdate unit)
+    {
+        product.ProductUnits.Remove(unit);
+
+        var unitToReAdd = allUnits.FirstOrDefault(u => u.Id == unit.UnitId);
+        if (unitToReAdd != null)
+        {
+            availableUnits.Add(unitToReAdd);
+        }
+
+        if (unit.IsPrimary && product.ProductUnits.Count > 0)
+        {
+            product.ProductUnits[0].IsPrimary = true;
+        }
+    }
+
+    private void SetPrimaryUnit(ProductUnitDtoForUpdate selectedUnit)
+    {
+        foreach (var unit in product.ProductUnits)
+        {
+            unit.IsPrimary = (unit.UnitId == selectedUnit.UnitId);
         }
     }
 
     public async Task UpdateProductAsync()
     {
-        try
+        if (!product.ProductUnits.Any(u => u.IsPrimary) && product.ProductUnits.Count > 0)
         {
-            await productManager.UpdateProductAsync(product);
+            product.ProductUnits[0].IsPrimary = true;
+        }
+
+        var response = await HttpClient.PutAsJsonAsync($"api/products/UpdateProduct", product);
+
+        if (response.IsSuccessStatusCode)
+        {
             NavigationManager.NavigateTo("products");
         }
-        catch (Exception ex)
+        else
         {
-            errorMessage = $"Error updating product: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", "Error updating product!");
         }
     }
 }

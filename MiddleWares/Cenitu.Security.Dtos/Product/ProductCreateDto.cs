@@ -10,7 +10,7 @@ namespace Cenitu.Security.Dtos.Product
     {
         public string Code { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public int PrimaryUnitId { get; set; }  // Ürünün birincil birimi
+        //public int PrimaryUnitId { get; set; }  // Ürünün birincil birimi
         public List<ProductUnitDto> ProductUnits { get; set; } = new();
     }
 

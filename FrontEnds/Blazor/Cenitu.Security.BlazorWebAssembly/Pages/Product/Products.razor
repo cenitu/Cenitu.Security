@@ -1,96 +1,135 @@
 ﻿@page "/products"
 @attribute [Authorize(Roles = "Admin, User")]
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Data
-@using System.Net.Http.Headers
-@inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
-@* @inject Blazored.LocalStorage.ILocalStorageService localStorage *@
 @inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
 
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-primary text-center">Product List</h3>
 
-<SfButton @onclick="Add"> Add </SfButton>
-<SfButton @onclick="Update"> Update - 1001 </SfButton>
-<SfButton @onclick="Delete"> Delete the selected row </SfButton>
-<SfGrid ID="Grid"
-        @ref="DefaultGrid"
-        TValue="ProductListDto"
-        AllowPaging="true"
-        AllowSorting="true"
-        AllowFiltering="true"
-        AllowExcelExport="true"
-        AllowReordering="true"
-        RowHeight="25"
-        Toolbar="@(new List<string>() { "Search", "Add", "Edit", "Delete", "Cancel", "Update", "ExcelExport"})" ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "Edit", "Delete", "Save", "Cancel","PdfExport", "ExcelExport", "CsvExport", "FirstPage", "PrevPage","LastPage", "NextPage"})">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
+                <SfButton CssClass="e-warning" IconCss="e-icons e-edit" @onclick="Update"> Update </SfButton>
+            </div>
+            <div>
+                <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
+                    <span class="ml-2">Export to Excel</span>
+                </SfButton>
+            </div>
+        </div>
+        <SfGrid ID="Grid"
+                @ref="DefaultGrid"
+                TValue="ProductListDto"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowExcelExport="true"
+                AllowPdfExport=true
+                AllowReordering="true"
+                RowHeight="35"
+                Toolbar="@(new List<string>() { "Search", "ExcelExport","PdfExport"})"
+                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "ExcelExport", "CsvExport"})">
+      @*   DataSource="@ProductList"
+        Load="OnLoad"> *@
 
-    <GridEditSettings AllowAdding=true AllowEditing=false AllowDeleting=true Mode="EditMode.Dialog"></GridEditSettings>
+    @* <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="fal" Mode="EditMode.Dialog"></GridEditSettings> *@
 
-@*     <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/odata/products?$expand=productunits($expand=unit)"></SfDataManager> *@
-    <SfDataManager HttpClientInstance="@httpClient" Adaptor="Adaptors.WebApiAdaptor" Url="/api/products/getproducts"></SfDataManager>
+            <SfDataManager HttpClientInstance="@httpClient" Url="/api/products/getproducts" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
 
-    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto" OnRecordDoubleClick="Update"></GridEvents>
+            <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductListDto"></GridEvents>
 
-    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
-    <GridPageSettings PageSize="20" PageSizes="true"></GridPageSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+            <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
 
-    <GridColumns>
-        <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="50" />
-        <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Kodu" Width="120" />
-        <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Açıklaması" Width="250" />
-
-        <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Birim" Width="250" />
-
-
-    </GridColumns>
-</SfGrid>
-
+            <GridColumns>
+                <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="80" />
+                <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
+                <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
+                <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="100" />
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
 <style>
     .e-grid .e-headercelldiv {
-        font-size: 14px;
+        font-size: 15px;
+        font-weight: bold;
+        color: #3c3c3c;
     }
 
     .e-grid .e-rowcell {
         font-size: 14px;
+        padding: 8px;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #f8f9fa;
+    }
+
+    .e-button {
+        font-size: 14px;
+    }
+
+    .e-icon-btn {
+        padding: 6px 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .ml-2 {
+        margin-left: 8px;
     }
 </style>
 
 @code {
-    private SfGrid<ProductListDto>? DefaultGrid;
+    SfGrid<ProductListDto>? DefaultGrid;
     private HttpClient? httpClient;
+    // private List<ProductListDto> ProductList = new();
+    private int? SelectedProductId;
 
-    override protected async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         httpClient = HttpClientFactory.CreateClient("Auth");
-        // httpClient.BaseAddress = new Uri("https://localhost:7064/odata");
-        // var defaultRequestHeaders = ttpClient.DefaultRequestHeaders.Authorization;
-        // HttpClient.DefaultRequestHeaders.Authorization = ttpClient.DefaultRequestHeaders.Authorization;
-        // HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await localStorage.GetItemAsync<string>("accessToken"));
-
-
-        await base.OnInitializedAsync();
+        base.OnInitialized();
     }
 
-    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+
+
+    public async Task ToolbarClickHandler(ClickEventArgs args)
     {
-        if (args.Item.Id == "Grid_excelexport") //Id is combination of Grid's ID and itemname
+        if (args.Item.Id == "Grid_excelexport")
         {
             await this.DefaultGrid.ExportToExcelAsync();
         }
+        if (args.Item.Id == "Grid_pdfexport")
+        {
+            await this.DefaultGrid.ExportToPdfAsync();
+        }
     }
+
     private void Add()
     {
         NavigationManager.NavigateTo("product/create");
     }
+
     private void Update()
     {
-        var id = DefaultGrid!.SelectedRecords.FirstOrDefault()?.Id;
-        if (id != null)
+        var selectedProduct = DefaultGrid?.SelectedRecords.FirstOrDefault();
+        if (selectedProduct != null)
         {
-            NavigationManager.NavigateTo($"product/update/{id}");
+            NavigationManager.NavigateTo($"product/update/{selectedProduct.Id}");
+        }
+        else
+        {
+            JSRuntime.InvokeVoidAsync("alert", "Please select a product to update.");
         }
     }
-    private void Delete(MouseEventArgs e)
+    private async Task ExportToExcel()
     {
-        throw new NotImplementedException();
+        await DefaultGrid!.ExportToExcelAsync();
     }
+
+
 }
