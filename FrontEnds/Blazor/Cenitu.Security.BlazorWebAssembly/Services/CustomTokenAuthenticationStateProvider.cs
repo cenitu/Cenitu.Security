@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using System.IO.Pipes;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -19,7 +20,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
         private readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         private readonly ILocalStorageService localStorage;
 
-        public CustomTokenAuthenticationStateProvider(IHttpClientFactory httpClientFactory,ILocalStorageService localStorage)
+        public CustomTokenAuthenticationStateProvider(IHttpClientFactory httpClientFactory, ILocalStorageService localStorage)
         {
             this.httpClient = httpClientFactory.CreateClient("Auth");
             this.localStorage = localStorage;
@@ -31,6 +32,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
             try
             {
                 var userResponse = await httpClient.GetAsync("manage/info");
+
                 userResponse.EnsureSuccessStatusCode();
                 var userJson = await userResponse.Content.ReadAsStringAsync();
                 var userInfo = JsonSerializer.Deserialize<UserInfo>(userJson, jsonOptions);
@@ -54,18 +56,36 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
                             claims.Add(new Claim(ClaimTypes.Role, role));
                         }
                     }
-                    var id = new ClaimsIdentity(claims, nameof(CustomAuthenticationStateProvider));
+                    var id = new ClaimsIdentity(claims, nameof(CustomTokenAuthenticationStateProvider));
                     user = new ClaimsPrincipal(id);
                     _authinticated = true;
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
+                var refreshToken = await localStorage.GetItemAsync<string>("refreshToken");
+                if (refreshToken is not null)
+                {
+                    
+                    var response = await httpClient.PostAsJsonAsync("refresh", new { RefreshToken = refreshToken });
+                    response.EnsureSuccessStatusCode();
+                    var tokenResponse = await response.Content.ReadAsStringAsync();
+                    var tokenInfo = JsonSerializer.Deserialize<TokenInfo>(tokenResponse, jsonOptions)!;
+                    await localStorage.SetItemAsync("accessToken", tokenInfo.AccessToken);
+                    await localStorage.SetItemAsync("refreshToken", tokenInfo.RefreshToken);
+                    _authinticated = true;
 
+                }
+                else
+                {
+                    await localStorage.RemoveItemAsync("accessToken");
+                    await localStorage.RemoveItemAsync("refreshToken");
+                    _authinticated = false;
+                }
             }
-            var bok = new AuthenticationState(user);
+           
             return new AuthenticationState(user);
         }
 
@@ -98,7 +118,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
                 }
                 return new FormResult { Succeeded = false, ErrorList = problemDetails == null ? defaultDetail : [.. errors] };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -115,18 +135,19 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
                     Email = email,
                     Password = password
                 });
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var tokenResponse = await response.Content.ReadAsStringAsync();
                     var tokenInfo = JsonSerializer.Deserialize<TokenInfo>(tokenResponse, jsonOptions)!;
                     await localStorage.SetItemAsync("accessToken", tokenInfo.AccessToken);
+                    await localStorage.SetItemAsync("refreshToken", tokenInfo.RefreshToken);
                     NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
                     return new FormResult { Succeeded = true };
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -140,11 +161,12 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
             const string empty = "{}";
             var emptyContent = new StringContent(empty, Encoding.UTF8, "application/json");
-            
-            var result= await httpClient.PostAsync("api/user/logout", emptyContent);
+
+            var result = await httpClient.PostAsync("api/user/logout", emptyContent);
             if (result.IsSuccessStatusCode)
             {
                 await localStorage.RemoveItemAsync("accessToken");
+                await localStorage.RemoveItemAsync("refreshToken");
                 NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             }
         }

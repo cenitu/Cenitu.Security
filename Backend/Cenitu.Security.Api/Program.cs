@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,12 +21,26 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+builder.Services.AddAuthorization(options => { });
 // 2️⃣ Identity Kullanıcı Yönetimi
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opts => { })
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opts => {
+    opts.Password.RequireNonAlphanumeric = true;
+    opts.User.RequireUniqueEmail = true;
+  
+   
+})
     .AddRoles<ApplicationRole>()
+    
     .AddEntityFrameworkStores<AppDbContext>();
-
+//builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).Configure(options => {
+//    options.BearerTokenExpiration = TimeSpan.FromSeconds(3600);
+//});
+//builder.Services.AddOptions<CookieOptions>(IdentityConstants.ApplicationScheme).Configure(options =>
+//{
+//    options.Expires = DateTimeOffset.Now.AddDays(-10);
+    
+   
+//});
 // 3️⃣ Servisleri Bağla
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IProductService, ProductService>();

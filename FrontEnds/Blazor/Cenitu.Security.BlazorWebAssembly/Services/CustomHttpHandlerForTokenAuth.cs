@@ -17,7 +17,9 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
         {
             
             var accessToken = await localStorage.GetItemAsync<string>("accessToken");
+            //var refreshToken = await localStorage.GetItemAsync<string>("refreshToken");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            //request.Headers.Authorization= new AuthenticationHeaderValue("Bearer", refreshToken);
             return await base.SendAsync(request, cancellationToken);
         }
     }
