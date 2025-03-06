@@ -27,6 +27,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.Dtos", "Mid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.BlazorWebAssembly", "FrontEnds\Blazor\Cenitu.Security.BlazorWebAssembly\Cenitu.Security.BlazorWebAssembly.csproj", "{4A081418-E401-4F80-A3DB-1C8DDE3EF362}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevExpress", "DevExpress", "{BD67292C-36DA-4999-8F11-10F74760BDAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.BlazorDevExpress", "FrontEnds\DevExpress\Cenitu.Security.BlazorDevexpress\Cenitu.Security.BlazorDevExpress.csproj", "{8E1A6575-6FB1-943A-577F-9B65FACF536E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cenitu.Security.BlazorDevExpress.Client", "FrontEnds\DevExpress\Cenitu.Security.BlazorDevExpress.Client\Cenitu.Security.BlazorDevExpress.Client.csproj", "{6C5A9E96-5511-841B-77A1-C42332DB3701}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +63,14 @@ Global
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E1A6575-6FB1-943A-577F-9B65FACF536E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E1A6575-6FB1-943A-577F-9B65FACF536E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E1A6575-6FB1-943A-577F-9B65FACF536E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E1A6575-6FB1-943A-577F-9B65FACF536E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C5A9E96-5511-841B-77A1-C42332DB3701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C5A9E96-5511-841B-77A1-C42332DB3701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C5A9E96-5511-841B-77A1-C42332DB3701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C5A9E96-5511-841B-77A1-C42332DB3701}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +85,9 @@ Global
 		{66287676-C84F-46B1-A1D9-261463990029} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{591F8188-0EFD-47FA-899A-B9DB45C9EE54} = {468D5A04-574A-42DB-879F-BC9197D65BBD}
 		{4A081418-E401-4F80-A3DB-1C8DDE3EF362} = {147ACDBD-B699-4D41-B029-6D080DA4FB15}
+		{BD67292C-36DA-4999-8F11-10F74760BDAD} = {CCBFF3B1-1DF8-44D2-80CC-326D07866F21}
+		{8E1A6575-6FB1-943A-577F-9B65FACF536E} = {BD67292C-36DA-4999-8F11-10F74760BDAD}
+		{6C5A9E96-5511-841B-77A1-C42332DB3701} = {BD67292C-36DA-4999-8F11-10F74760BDAD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2B16260-CAF0-4280-991C-796DEC8AB729}

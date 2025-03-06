@@ -13,75 +13,67 @@ using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1️⃣ Database Bağlantısı
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddAuthorization(options => { });
-// 2️⃣ Identity Kullanıcı Yönetimi
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opts => {
-    opts.Password.RequireNonAlphanumeric = true;
-    opts.User.RequireUniqueEmail = true;
-  
-   
-})
+
+builder.Services
+    .AddIdentityApiEndpoints<ApplicationUser>(opts =>
+    {
+        opts.Password.RequireNonAlphanumeric = true;
+        opts.User.RequireUniqueEmail = true;
+    })
     .AddRoles<ApplicationRole>()
-    
     .AddEntityFrameworkStores<AppDbContext>();
-//builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).Configure(options => {
-//    options.BearerTokenExpiration = TimeSpan.FromSeconds(3600);
-//});
-//builder.Services.AddOptions<CookieOptions>(IdentityConstants.ApplicationScheme).Configure(options =>
-//{
-//    options.Expires = DateTimeOffset.Now.AddDays(-10);
-    
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+    options.SlidingExpiration = true;
+    options.Cookie.Name = "Cenitu.Security";
+    options.LoginPath = "/api/identity/login";
+    options.LogoutPath = "/api/identity/logout";
+    options.AccessDeniedPath = "/api/identity/access-denied";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
+
+
+
+builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).Configure(options =>
+{
+    options.BearerTokenExpiration = TimeSpan.FromSeconds(3600);
    
-//});
-// 3️⃣ Servisleri Bağla
+});
+
+
+
+
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 
-//// 4️⃣ OData Modeli Tanımlama
-//ODataConventionModelBuilder odataBuilder = new ODataConventionModelBuilder();
-//odataBuilder.EntitySet<Product>("Products"); // OData için "Products" entity'si
-//odataBuilder.EntitySet<Order>("Orders"); // OData için "Orders" entity'si
-//odataBuilder.EntitySet<ProductUnit>("ProductUnits"); // OData için "ProductUnits" entity'si
 
-//IEdmModel edmModel = odataBuilder.GetEdmModel();
-
-//static IEdmModel GetEdmModel()
-//{
-//    ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-//    var books = builder.EntitySet<Product>("Products");
-//    FunctionConfiguration myFirstFunction = books.EntityType.Collection.Function("MyFirstFunction");
-//    myFirstFunction.ReturnsCollectionFromEntitySet<Product>("Products");
-//    return builder.GetEdmModel();
-//}
-
-// 5️⃣ OData Konfigürasyonu
 builder.Services.AddControllers();
-//builder.Services.AddControllers()
-    
-    //.AddOData(opt =>
-    //{
-    //    opt.AddRouteComponents("odata", edmModel) // "api/odata" yerine "odata" route kullanıldı
-    //        .Select()
-    //        .Expand()
-    //        .Filter()
-    //        .OrderBy()
-    //        .SetMaxTop(100) // Maksimum veri limiti
-    //        .Count()
-    //        .Expand()
-    //        ;
-    //});
 
-// 6️⃣ Swagger Ayarları (OData ile uyumlu hale getir)
 builder.Services.AddSwaggerGen(opts =>
 {
     opts.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
@@ -93,24 +85,16 @@ builder.Services.AddSwaggerGen(opts =>
 
     opts.OperationFilter<SecurityRequirementsOperationFilter>();
 
-    //// 🌟 OData endpoint çakışmasını önlemek için belirli yolları hariç tut
-    //opts.DocInclusionPredicate((docName, apiDesc) =>
-    //{
-    //    return apiDesc.RelativePath != null &&
-    //           !apiDesc.RelativePath.StartsWith("odata/$metadata");
-    //    //&& !apiDesc.RelativePath.StartsWith("odata/Products/$count");
-    //});
 
-    //// 🌟 OData Query Parametrelerini Swagger için tanımla
-    //opts.OperationFilter<ODataQueryOptionsFilter>();
 });
 
-// 7️⃣ CORS Ayarları
+
 builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("wasm", policy =>
     {
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:7292").AllowCredentials();
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:65515").AllowCredentials();
     });
 });
 
@@ -119,15 +103,16 @@ var app = builder.Build();
 app.UseCors("wasm");
 app.MapIdentityApi<ApplicationUser>();
 
-// 8️⃣ Swagger UI & API Dokümantasyonu
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// 9️⃣ Middleware & API Route Mapping
+
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
