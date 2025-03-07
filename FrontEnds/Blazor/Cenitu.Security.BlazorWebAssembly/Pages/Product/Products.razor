@@ -96,19 +96,6 @@
     }
 
 
-
-    public async Task ToolbarClickHandler(ClickEventArgs args)
-    {
-        if (args.Item.Id == "Grid_excelexport")
-        {
-            await this.DefaultGrid.ExportToExcelAsync();
-        }
-        if (args.Item.Id == "Grid_pdfexport")
-        {
-            await this.DefaultGrid.ExportToPdfAsync();
-        }
-    }
-
     private void Add()
     {
         NavigationManager.NavigateTo("product/create");
