@@ -15,7 +15,12 @@ namespace Cenitu.Security.BlazorDevExpress.Extensions
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>(); //For cookie based authentication
             builder.Services.AddHttpClient("Auth", opt =>
                opt.BaseAddress = new Uri(builder.Configuration["BackendUrl"] ?? "https://localhost:7064")).AddHttpMessageHandler<CustomHttpHandler>();
-          
+
+
+            builder.Services.AddScoped(sp => (IAccountManagement)sp.GetRequiredService<AuthenticationStateProvider>());
+
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["FrontendUrl"] ?? "https://localhost:7700") });
+
         }
 
         

@@ -29,6 +29,7 @@ builder.AddCookieAuthentication();
 builder.Services.AddScoped(sp => (IAccountManagement)sp.GetRequiredService<AuthenticationStateProvider>());
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["FrontendUrl"] ?? "https://localhost:7292") });
+
 builder.Services.AddSyncfusionBlazor();
 
 

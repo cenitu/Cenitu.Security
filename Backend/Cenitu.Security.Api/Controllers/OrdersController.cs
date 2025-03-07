@@ -1,25 +1,37 @@
 ﻿using Cenitu.Security.DataAccess;
 using Cenitu.Security.Domain.Entities;
+using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Cenitu.Security.Api.Controllers
 {
-    //[Route("api/odata/[controller]")]
-    public class OrdersController : ODataController
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
-        public OrdersController(AppDbContext appDbContext)
+        private readonly IOrderService orderService;
+        public OrdersController(AppDbContext appDbContext, IOrderService orderService)
         {
             _appDbContext = appDbContext;
+            this.orderService = orderService;
         }
 
         [HttpGet]
-        [EnableQuery]
-        public IActionResult Get()
+
+        public async Task<IActionResult> Get([FromQuery(Name = "$inlinecount")] string? inlinecount,
+            [FromQuery(Name = "$skip")] int skip,
+            [FromQuery(Name = "$top")] int? top,
+            [FromQuery(Name = "$filter")] string? filter,
+            [FromQuery(Name = "$orderby")] string? orderby)
         {
-            return Ok(_appDbContext.Orders);
+            var result =await orderService.GetOrdersAsync(skip, top, filter, orderby);
+            if (inlinecount == null)
+            {
+                return Ok(result.Items);
+            }
+            return Ok(result);
         }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Order order)

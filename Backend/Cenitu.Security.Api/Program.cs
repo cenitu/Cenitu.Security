@@ -37,7 +37,7 @@ builder.Services
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+    options.ExpireTimeSpan = TimeSpan.FromHours(1);
     options.SlidingExpiration = true;
     options.Cookie.Name = "Cenitu.Security";
     options.LoginPath = "/api/identity/login";
@@ -69,6 +69,7 @@ builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUnitService, UnitService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 
 
