@@ -6,12 +6,13 @@
 <AuthorizeView>
     <div class="col-12 mt-4">
         <div class="card shadow-lg p-4">
-            <h3 class="text-primary text-center">Product List</h3>
+            <h3 class="text-primary text-center">Products</h3>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
-                    <SfButton CssClass="e-warning" IconCss="e-icons e-edit" @onclick="Update"> Update </SfButton>
+                    @* <SfButton CssClass="e-warning" IconCss="e-icons e-edit" @onclick="Update"> Update </SfButton> *@
+                    <SfButton OnClick="@(async() =>await DefaultGrid!.ResetPersistDataAsync())">Reset State</SfButton>
                 </div>
                 <div class="d-flex justify-content-end">
                     <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
@@ -22,7 +23,7 @@
                     </SfButton>
                 </div>
             </div>
-            <SfGrid ID="Grid"
+            <SfGrid ID="ProductsGrid"
                     @ref="DefaultGrid"
                     TValue="ProductListDto"
                     AllowPaging="true"
@@ -32,19 +33,18 @@
                     AllowReordering="true"
                     AllowExcelExport="true"
                     AllowPdfExport="true"
+                    EnablePersistence="true"
                     ShowColumnChooser="true"
                     RowHeight="35"
-                    Toolbar="@(new List<string>() { "Search", "ColumnChooser","ExcelExport"})"
-                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "ExcelExport", "CsvExport"})">
-      @*   DataSource="@ProductList"
-        Load="OnLoad"> *@
+                    Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
 
-    @* <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="fal" Mode="EditMode.Dialog"></GridEditSettings> *@
 
                 <SfDataManager HttpClientInstance="@httpClient" Url="/api/products/getproducts" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
 
-          
 
+                <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="false" Mode="EditMode.Normal"></GridEditSettings>
+                <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="ProductListDto"></GridEvents>
                 <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
                 <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
 
@@ -125,18 +125,23 @@
 
     private async Task ExportToExcel()
     {
-        
-            await DefaultGrid!.ExportToExcelAsync();
-        
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.FileName = "Products.xlsx";
+        await DefaultGrid!.ExportToExcelAsync(ExcelProperties);
+
     }
 
     private async Task ExportToPdf()
     {
-        
-            await DefaultGrid!.ExportToPdfAsync();
-        
-      
+        PdfExportProperties PdfProperties = new PdfExportProperties();
+        PdfProperties.FileName = "Products.pdf";
+        await DefaultGrid!.ExportToPdfAsync(PdfProperties);
+
+
     }
 
-
+    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<ProductListDto> args)
+    {
+        NavigationManager.NavigateTo($"product/update/{args.RowData.Id}");
+    }
 }

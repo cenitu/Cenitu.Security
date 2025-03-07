@@ -1,3 +1,8 @@
+@typeparam T
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
@@ -12,3 +17,36 @@
         </SfButton>
     </div>
 </div>
+
+@code {
+
+    [Parameter]
+    public SfGrid<T>? DefaultGrid { get; set; }
+    private async Task ExportToExcel()
+    {
+
+        await DefaultGrid!.ExportToExcelAsync();
+    }
+
+    private async Task ExportToPdf()
+    {
+        await DefaultGrid!.ExportToPdfAsync();
+    }
+    private void Add()
+    {
+        NavigationManager.NavigateTo("order/create");
+    }
+
+    private void Update()
+    {
+        // var selectedProduct = DefaultGrid!.SelectedRecords.FirstOrDefault();
+        // if (selectedProduct != null)
+        // {
+        //     NavigationManager.NavigateTo($"order/update/{selectedProduct.Id}");
+        // }
+        // else
+        // {
+        //     JSRuntime.InvokeVoidAsync("alert", "Please select a product to update.");
+        // }
+    }
+}

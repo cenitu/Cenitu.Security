@@ -14,6 +14,6 @@ namespace Cenitu.Security.Dtos
         public int ProductId { get; set; } = 0;
         public int Quantity { get; set; } = 0;
         public string ProductDescription { get; set; }
-        public ProductListDto Product { get; set; }
+        //public ProductListDto Product { get; set; }
     }
 }
