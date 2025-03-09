@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\Backend\Cenitu.Security.DataAccess\Cenitu.Security.DataAccess.csproj" />
 		<ProjectReference Include="..\..\..\MiddleWares\Cenitu.Security.Dtos\Cenitu.Security.Dtos.csproj" />
 	</ItemGroup>
 

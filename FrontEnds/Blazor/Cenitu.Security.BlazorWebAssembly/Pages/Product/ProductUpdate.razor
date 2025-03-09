@@ -60,7 +60,7 @@
                             <td>
                                 <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" />
                             </td>
-                            <td>@unit.UnitSymbol</td>
+                            <td>@unit.Symbol</td>
                             <td>
                                 <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" />
                             </td>
@@ -123,11 +123,11 @@
             }
         }
 
-        product.ProductUnits.Add(new ProductUnitDtoForUpdate
+        product.ProductUnits.Add(new ProductUnitDto
             {
                 ProductId = product.Id,
                 UnitId = selectedUnit.Id,
-                UnitSymbol = selectedUnit.Symbol,
+                Symbol = selectedUnit.Symbol,
                 ConversionFactor = 1.0M,
                 IsPrimary = isPrimary
             });
@@ -136,7 +136,7 @@
         selectedUnitId = null;
     }
 
-    private void RemoveUnit(ProductUnitDtoForUpdate unit)
+    private void RemoveUnit(ProductUnitDto unit)
     {
         product.ProductUnits.Remove(unit);
 
@@ -152,7 +152,7 @@
         }
     }
 
-    private void SetPrimaryUnit(ProductUnitDtoForUpdate selectedUnit)
+    private void SetPrimaryUnit(ProductUnitDto selectedUnit)
     {
         foreach (var unit in product.ProductUnits)
         {

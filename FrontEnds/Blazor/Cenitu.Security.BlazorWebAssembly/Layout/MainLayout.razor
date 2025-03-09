@@ -1,12 +1,15 @@
 ﻿@inherits LayoutComponentBase
 <div class="page">
-    <div class="sidebar">
+    <div class="sidebar" hidden="@isHidden">
         <NavMenu />
     </div>
 
     <main>
 
         <div class="top-row px-4">
+            <button class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon" ></span>
+            </button>
             <AuthorizeView>
                 <Authorized>
                     <span class="bi bi-person" aria-hidden="true" style="vertical-align:middle"></span>Welcome, @context.User.Identity!.Name
@@ -24,3 +27,12 @@
         </article>
     </main>
 </div>
+@code {
+    private bool isHidden;
+    private void ToggleNavMenu(MouseEventArgs args)
+    {
+        Console.WriteLine("ToggleNavMenu");
+        isHidden = !isHidden;
+
+    }
+}
