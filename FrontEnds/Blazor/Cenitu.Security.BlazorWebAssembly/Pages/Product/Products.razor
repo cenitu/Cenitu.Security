@@ -1,4 +1,5 @@
 ﻿@page "/products"
+@using Cenitu.Security.Dtos.Product
 @attribute [Authorize(Roles = "Admin, User")]
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
@@ -40,7 +41,7 @@
                     ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
 
 
-                <SfDataManager HttpClientInstance="@httpClient" Url="/api/products/getproducts" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+                <SfDataManager HttpClientInstance="@httpClient" Url="/products" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
 
 
                 <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="false" Mode="EditMode.Normal"></GridEditSettings>
@@ -50,9 +51,13 @@
 
                 <GridColumns>
                     <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="80" Visible="false" />
-                    <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="120" />
+                    <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
                     <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
-                    <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="100" />
+                    <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />
+                    <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100"/>
+                    <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100"/>
+                    <GridColumn Field="@nameof(ProductListDto.LastModifiedByUserName)" HeaderText="Last Modified By" Width="100" />
+                    <GridColumn Field="@nameof(ProductListDto.LastModifiedDate)" HeaderText="Last Modified Date" Width="100" />
                 </GridColumns>
             </SfGrid>
         </div>

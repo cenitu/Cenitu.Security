@@ -4,6 +4,7 @@ using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos;
 using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -15,7 +16,7 @@ namespace Cenitu.Security.Services.Services
         private readonly IMapper mapper;
         private readonly AppDbContext context;
 
-        public ProductService(AppDbContext context, IMapper mapper)
+        public ProductService(AppDbContext context, IMapper mapper )
         {
             this.context = context;
             this.mapper = mapper;
@@ -33,8 +34,32 @@ namespace Cenitu.Security.Services.Services
 
         public async Task<ProductCreateDto> AddProductAsync(ProductCreateDto productCreateDto)
         {
+            if (productCreateDto.CreatedByUserName is null)
+            {
+                throw new Exception("User name is not supplied");
+            }
+            //var user = await userManager.FindByEmailAsync(productCreateDto.CreatedByUserName) ?? throw new Exception("Un Authorized");
             var product = mapper.Map<Product>(productCreateDto);
+            product.CreatedById = productCreateDto.CreatedByUserName;
+            //product.CreatedBy = user;
+            product.CreatedDate= DateTime.Now;
+            product.ProductUnits = [.. productCreateDto.ProductUnits.Select(pu => new ProductUnit
+            {
+                UnitId = pu.UnitId,
+                IsPrimary = pu.IsPrimary,
+                ConversionFactor = pu.ConversionFactor
+            })];
+            //product.ProductUnits = [];
+            //foreach (var productUnit in productCreateDto.ProductUnits!)
+            //{
+            //    product.ProductUnits.Add(new ProductUnit
+            //    {
+            //        UnitId = productUnit.UnitId,
+            //        ConversionFactor = productUnit.ConversionFactor,
+            //    });
+            //}
             context.Products.Add(product);
+           
             var result = await context.SaveChangesAsync();
 
             if (result == 0)
@@ -48,8 +73,9 @@ namespace Cenitu.Security.Services.Services
 
         public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productUpdateDto)
         {
-            var product = await context.Products.Include(x => x.ProductUnits).ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
-            if (product == null)
+            //var user = await userManager.FindByEmailAsync(productUpdateDto.LastModifiedByUserName!);
+            var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
+            if (product == null )
             {
                 throw new Exception("Product not found");
             }
@@ -64,6 +90,10 @@ namespace Cenitu.Security.Services.Services
                 IsPrimary = pu.IsPrimary,
                 ConversionFactor = pu.ConversionFactor
             }).ToList();
+
+            product.LastModifiedById = productUpdateDto.LastModifiedByUserName;
+            //product.LastModifiedBy = user;
+            product.LastModifiedDate = DateTime.Now;
             //context.Products.Update(productToUpdate);
             // Değişiklikleri kaydet
             var result = await context.SaveChangesAsync();
@@ -80,13 +110,16 @@ namespace Cenitu.Security.Services.Services
 
         public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
         {
-            var query = context.Products.Include(x => x.ProductUnits).ThenInclude(x => x.Unit).AsQueryable();
+            var query = context.Products
+                .Include(x => x.ProductUnits!).ThenInclude(x => x.Unit)
+                .Include(x=>x.CreatedBy)
+                .Include(x=>x.LastModifiedBy).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
                 var matches = Regex.Matches(filter, @"'([^']*)'");
                 var filterValues = matches.Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                 filter = filterValues.First();
-                query = query.Where(x => x.Code.Contains(filter) || x.Description.Contains(filter) || x.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()!.Unit.Symbol.Contains(filter));
+                query = query.Where(x => x.Code.Contains(filter) || x.Description.Contains(filter) || x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit.Symbol.Contains(filter));
             }
             if (!string.IsNullOrEmpty(orderby))
             {
@@ -95,12 +128,12 @@ namespace Cenitu.Security.Services.Services
 
                 if (orderBys.Length == 2 && orderBys[0] == "PrimaryUnitSymbol")
                 {
-                    query = query.OrderByDescending(x => EF.Property<object>(x.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
+                    query = query.OrderByDescending(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
 
                 }
                 else if (orderBys[0] == "PrimaryUnitSymbol")
                 {
-                    query = query.OrderBy(x => EF.Property<object>(x.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
+                    query = query.OrderBy(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
                 }
                 else if (orderBys.Length == 2)
                 {

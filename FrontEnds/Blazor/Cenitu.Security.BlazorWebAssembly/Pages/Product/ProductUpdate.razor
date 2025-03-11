@@ -1,11 +1,11 @@
 ﻿@page "/product/update/{id:int}"
 @using Cenitu.Security.Dtos.Product
 @using Cenitu.Security.Dtos.Unit
-@inject IProductManager productManager
 @inject IHttpClientFactory HttpClientFactory
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = "Admin")]
 
 <h3 class="text-center mt-4 text-primary">Update Product</h3>
@@ -60,7 +60,7 @@
                             <td>
                                 <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" />
                             </td>
-                            <td>@unit.Symbol</td>
+                            <td>@unit.UnitSymbol</td>
                             <td>
                                 <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" />
                             </td>
@@ -92,10 +92,10 @@
         HttpClient = HttpClientFactory.CreateClient("Auth");
 
         // Mevcut ürün bilgilerini API'den çek
-        product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"api/Products/GetProduct?Id={Id}") ?? new();
+        product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"Products/{Id}") ?? new();
 
         // Mevcut tüm birimleri çek
-        allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("api/units")) ?? [];
+        allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("units")) ?? [];
 
         // Kullanılmayan birimleri listeye ekle
         availableUnits = allUnits.Where(u => !product.ProductUnits.Any(pu => pu.UnitId == u.Id)).ToList();
@@ -127,7 +127,7 @@
             {
                 ProductId = product.Id,
                 UnitId = selectedUnit.Id,
-                Symbol = selectedUnit.Symbol,
+                UnitSymbol = selectedUnit.Symbol,
                 ConversionFactor = 1.0M,
                 IsPrimary = isPrimary
             });
@@ -166,8 +166,10 @@
         {
             product.ProductUnits[0].IsPrimary = true;
         }
-
-        var response = await HttpClient.PutAsJsonAsync($"api/products/UpdateProduct", product);
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+        product.LastModifiedByUserName = user.Identity!.Name;
+        var response = await HttpClient.PutAsJsonAsync($"products", product);
 
         if (response.IsSuccessStatusCode)
         {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Cenitu.Security.Domain.Entities;
-using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Order;
 using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Dtos.Unit;
 using System;
@@ -16,11 +16,11 @@ namespace Cenitu.Security.Services.AutoMapper
         public MyMapper()
         {
             CreateMap<Product, ProductListDto>().ReverseMap();
-            CreateMap<Product, ProductAddDto>().ReverseMap();
+            //CreateMap<Product, ProductAddDto>().ReverseMap();
             CreateMap<Product, ProductCreateDto>().ReverseMap();
             //CreateMap<ProductUnit, ProductUnitDto>().ReverseMap();
             CreateMap<Unit,UnitDto>().ReverseMap();
-            CreateMap<ProductUnit, ProductUnitDtoOld>().ReverseMap();
+            //CreateMap<ProductUnit, ProductUnitDtoOld>().ReverseMap();
             CreateMap<ProductUnit, ProductUnitDto>().ReverseMap();
 
             CreateMap<ProductCreateDto, Product>().ReverseMap();

@@ -40,7 +40,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
                     };
                     claims.AddRange(userInfo.Claims.Where(c => c.Key != ClaimTypes.Name && c.Key != ClaimTypes.Email).Select(c => new Claim(c.Key, c.Value)));
-                    var rolesResponse = await httpClient.GetAsync($"/api/Role/GetUserRole?emailId={userInfo.Email}");
+                    var rolesResponse = await httpClient.GetAsync($"Role/GetUserRole?emailId={userInfo.Email}");
                     rolesResponse.EnsureSuccessStatusCode();
                     var rolesJson = await rolesResponse.Content.ReadAsStringAsync();
                     var roles = JsonSerializer.Deserialize<string[]>(rolesJson, jsonOptions);
@@ -132,7 +132,7 @@ namespace Cenitu.Security.BlazorWebAssembly.Services
 
             const string empty = "{}";
             var emptyContent = new StringContent(empty, Encoding.UTF8, "application/json");
-            await httpClient.PostAsync("api/user/logout", emptyContent);
+            await httpClient.PostAsync("user/logout", emptyContent);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
         }

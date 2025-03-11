@@ -21,7 +21,8 @@ namespace Cenitu.Security.Api.Controllers
         }
 
         [Authorize(Roles = "Admin, User")]
-        [HttpGet("GetProducts")]
+        //[HttpGet("GetProducts")]
+        [HttpGet]
         public async Task<IActionResult> GetProductsAsync(
             [FromQuery(Name = "$inlinecount")] string? inlinecount,
             [FromQuery(Name = "$skip")] int skip,
@@ -43,29 +44,44 @@ namespace Cenitu.Security.Api.Controllers
         //    var productList = await productService.GetProductsAsync();
         //    return Ok(productList);
         //}
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         //[HttpPost("AddProduct")]
-        [HttpPost("AddProduct")]
-        public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productAddDto)
+        //[HttpPost("AddProduct")]
+        [HttpPost]
+        public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productCreateDto)
         {
-            var result = await _productService.AddProductAsync(productAddDto);
+            //productCreateDto.CreatedByUserName = User.Identity!.Name;
+            //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            productCreateDto.CreatedByUserName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _productService.AddProductAsync(productCreateDto);
             return Ok(result);
         }
 
-        [HttpPut("UpdateProduct")]
+        //[HttpPut("UpdateProduct")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
         public async Task<IActionResult> UpdateProductAsync([FromBody] ProductUpdateDto productUpdateDto)
         {
+            productUpdateDto.LastModifiedByUserName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var result = await _productService.UpdateProductAsync(productUpdateDto);
             return Ok(result);
         }
         [Authorize(Roles = "Admin, User")]
-        [HttpGet("GetProduct")]
+        //[HttpGet("GetProduct")]
+        [HttpGet("{Id}")]
         public async Task<ProductUpdateDto> GetProduct(int Id)
         {
             var result = await _productService.GetProductAsync(Id);
             return result;
         }
-        
-  
+
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> DeleteProduct(int Id)
+        {
+           
+            return Ok();
+        }
+
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/orders"
+@using Cenitu.Security.Dtos.Order
 @attribute [Authorize(Roles = "Admin, User")]
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
@@ -45,7 +46,7 @@
                     ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "ExcelExport", "CsvExport"})">
 
                 
-                <SfDataManager HttpClientInstance="@httpClient" Url="/api/orders" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+                <SfDataManager HttpClientInstance="@httpClient" Url="/orders" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
                 <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
                 <GridPageSettings PageSize="8"></GridPageSettings>
 

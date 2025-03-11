@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Cenitu.Security.DataAccess\Cenitu.Security.DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="AutoMapper\Resolvers\" />
-  </ItemGroup>
-
 </Project>

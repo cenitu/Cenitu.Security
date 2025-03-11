@@ -32,7 +32,7 @@ builder.Services
     })
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<AppDbContext>();
-
+    
 
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -102,7 +102,7 @@ builder.Services.AddCors(opts =>
 var app = builder.Build();
 
 app.UseCors("wasm");
-app.MapIdentityApi<ApplicationUser>();
+app.MapGroup("api").MapIdentityApi<ApplicationUser>();
 
 
 if (app.Environment.IsDevelopment())
