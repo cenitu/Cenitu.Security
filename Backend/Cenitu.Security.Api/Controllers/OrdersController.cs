@@ -1,5 +1,6 @@
 ﻿using Cenitu.Security.DataAccess;
 using Cenitu.Security.Domain.Entities;
+using Cenitu.Security.Dtos.Order;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -34,10 +35,10 @@ namespace Cenitu.Security.Api.Controllers
             return Ok(result);
         }
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Order order)
+        public async Task<IActionResult> Post([FromBody] ProductionOrderCreateDto order)
         {
-            _appDbContext.Orders.Add(order);
-            await _appDbContext.SaveChangesAsync();
+
+            await orderService.AddOrderAsync(order);
             return Ok(order);
         }
     }

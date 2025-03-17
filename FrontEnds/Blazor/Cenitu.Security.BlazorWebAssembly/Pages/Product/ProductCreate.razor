@@ -13,15 +13,28 @@
     <div class="card shadow-lg p-4">
         <div class="row">
             <div class="col-md-6">
-                <label class="form-label" for="Code">Product Code</label>
-                <input type="text" class="form-control" @bind="product.Code" autofocus required id="Code" name="codeInput" placeholder="Enter Product Code" />
+                @* <label class="form-label" for="Code">Product Code</label> *@
+   @*              <input type="text" class="form-control" @bind="product.Code" autofocus required id="Code" name="codeInput" placeholder="Enter Product Code" /> *@
+
+                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="FloatLabelType.Auto" placeholder="Enter Product Code" />
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="Description">Product Description</label>
                 <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" placeholder="Enter Product Description" />
             </div>
         </div>
-
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label class="form-label">Product Type</label>
+                <select class="form-control" @bind="product.ProductType">
+                    <option value="">-- Select a Product Type --</option>
+                    @foreach (var type in productTypes)
+                    {
+                        <option value="@type.Value">@type.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
         <hr class="my-4" />
 
         <h4 class="text-center text-secondary">Product Units</h4>
@@ -35,6 +48,9 @@
                         <option value="@unit.Id">@unit.Symbol</option>
                     }
                 </select>
+                <SfDropDownList TValue="int?" TItem="UnitDto" @bind-Value="@selectedUnitId" DataSource="@availableUnits">
+                    <DropDownListFieldSettings Value="Symbol"></DropDownListFieldSettings>
+                </SfDropDownList>
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-success w-100" @onclick="AddUnit">Add Unit</button>
@@ -84,6 +100,7 @@
     private List<UnitDto> availableUnits = new();
     private List<UnitDto> allUnits = new();
     private int? selectedUnitId;
+    private List<(ProductType Value, string Text)> productTypes = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,6 +108,11 @@
         allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("units")) ?? [];
 
         availableUnits = new List<UnitDto>(allUnits);
+
+        // Enum değerlerini listeye çevir
+        productTypes = Enum.GetValues<ProductType>()
+                           .Select(e => (e, e.GetDisplayName())) // Eğer Display Name eklemek istersen burayı güncelle
+                           .ToList();
     }
 
     private void AddUnit()

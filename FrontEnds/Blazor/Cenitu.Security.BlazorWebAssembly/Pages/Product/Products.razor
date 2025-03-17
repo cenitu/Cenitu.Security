@@ -1,4 +1,6 @@
 ﻿@page "/products"
+@using Cenitu.Security.Dtos.Enums
+@using Cenitu.Security.Dtos.Extensions
 @using Cenitu.Security.Dtos.Product
 @attribute [Authorize(Roles = "Admin, User")]
 @inject NavigationManager NavigationManager
@@ -51,6 +53,8 @@
 
                 <GridColumns>
                     <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="80" Visible="false" />
+                    <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100"
+                                />
                     <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
                     <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
                     <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />

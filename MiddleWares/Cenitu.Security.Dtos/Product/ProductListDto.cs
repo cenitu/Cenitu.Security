@@ -1,12 +1,15 @@
-﻿namespace Cenitu.Security.Dtos.Product
+﻿using Cenitu.Security.Dtos.Enums;
+
+namespace Cenitu.Security.Dtos.Product
 {
-    public class ProductListDto:TracedBaseDto
+    public class ProductListDto : TracedBaseDto
     {
         public int Id { get; set; }
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
+        public string PrimaryUnitSymbol { get; set; } = default!;
+        public ProductType ProductType { get; set; }
+        public ProductTrackingType ProductTrackingType { get; set; }
 
-        public string PrimaryUnitSymbol { get; set; } =default!;      
-     
     }
 }

@@ -1,4 +1,5 @@
-﻿using Cenitu.Security.Dtos;
+﻿using Cenitu.Security.Domain.Entities;
+using Cenitu.Security.Dtos;
 using Cenitu.Security.Dtos.Order;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace Cenitu.Security.Services.Interfaces
 {
     public interface IOrderService
     {
+        Task AddOrderAsync(ProductionOrderCreateDto order);
         Task<ApiResponse<OrderListDto>> GetOrdersAsync(int skip, int? top, string? filter, string? orderby);
     }
 }

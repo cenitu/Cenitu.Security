@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Cenitu.Security.Services.Services
 {
-    public class OrderService :IOrderService
+    public class OrderService : IOrderService
     {
         private readonly AppDbContext _appDbContext;
         private readonly IMapper mapper;
@@ -24,20 +24,25 @@ namespace Cenitu.Security.Services.Services
             _appDbContext = appDbContext;
             this.mapper = mapper;
         }
-
+        public async Task AddOrderAsync(ProductionOrderCreateDto orderCreateDto)
+        {
+            var order=mapper.Map<ProductionOrder>(orderCreateDto);
+                _appDbContext.Orders.Add(order);
+            await _appDbContext.SaveChangesAsync();
+        }
         public async Task<ApiResponse<OrderListDto>> GetOrdersAsync(int skip, int? top, string? filter, string? orderby)
         {
-            var query=_appDbContext.Orders.Include(x=>x.Product).AsQueryable();
+            var query = _appDbContext.Orders.Include(x => x.Product).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.OrderNumber.Contains(filter)|| x.Product.Code.Contains(filter)|| x.Product.Description.Contains(filter));
+                query = query.Where(x => x.OrderNumber.Contains(filter) || x.Product.Code.Contains(filter) || x.Product.Description.Contains(filter));
             }
             if (!string.IsNullOrEmpty(orderby))
             {
                 var orderBys = orderby.Split(' ');
-                var property = typeof(Order).GetProperty(orderBys[0])!;
+                var property = typeof(ProductionOrder).GetProperty(orderBys[0])!;
 
-               if (orderBys.Length == 2)
+                if (orderBys.Length == 2)
                 {
                     query = query.OrderByDescending(x => EF.Property<object>(x, orderBys[0]));
                 }
@@ -57,12 +62,12 @@ namespace Cenitu.Security.Services.Services
             }
             var orders = await query.ToListAsync();
             var orderListDto = mapper.Map<List<OrderListDto>>(orders);
-            return  new ApiResponse<OrderListDto>
+            return new ApiResponse<OrderListDto>
             {
                 Count = count,
                 Items = orderListDto
             };
-           
+
         }
     }
 }

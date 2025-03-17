@@ -8,4 +8,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
 	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\MiddleWares\Cenitu.Security.Dtos\Cenitu.Security.Dtos.csproj" />
+	</ItemGroup>
 </Project>
