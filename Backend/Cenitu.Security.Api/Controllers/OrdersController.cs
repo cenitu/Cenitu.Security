@@ -41,5 +41,12 @@ namespace Cenitu.Security.Api.Controllers
             await orderService.AddOrderAsync(order);
             return Ok(order);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] int id)
+        {
+            await orderService.DeleteOrderAsync(id);
+            return Ok();
+        }
     }
 }

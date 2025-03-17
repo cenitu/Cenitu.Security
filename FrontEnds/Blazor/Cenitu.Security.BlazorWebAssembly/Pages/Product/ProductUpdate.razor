@@ -22,7 +22,22 @@
                 <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" />
             </div>
         </div>
-
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label class="form-label">Product Type</label>
+                <select class="form-control" @bind="product.ProductType">
+                    <option value="">-- Select a Product Type --</option>
+                    @foreach (var type in productTypes)
+                    {
+                        <option value="@type.Value">@type.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Product Type</label>
+                <SfNumericTextBox @bind-Value="product.Weight" FloatLabelType="FloatLabelType.Auto" Placeholder="Enter Product Weight"  />
+            </div>
+        </div>
         <hr class="my-4" />
 
         <h4 class="text-center text-secondary">Product Units</h4>
@@ -86,7 +101,7 @@
     private List<UnitDto> availableUnits = new();
     private List<UnitDto> allUnits = new();
     private int? selectedUnitId;
-
+    private List<(ProductType Value, string Text)> productTypes = new();
     protected override async Task OnInitializedAsync()
     {
         HttpClient = HttpClientFactory.CreateClient("Auth");
@@ -99,6 +114,10 @@
 
         // Kullanılmayan birimleri listeye ekle
         availableUnits = allUnits.Where(u => !product.ProductUnits.Any(pu => pu.UnitId == u.Id)).ToList();
+
+        productTypes = Enum.GetValues<ProductType>()
+                           .Select(e => (e, e.GetDisplayName())) // Eğer Display Name eklemek istersen burayı güncelle
+                           .ToList();
     }
 
     private void AddUnit()

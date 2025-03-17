@@ -11,8 +11,11 @@ namespace Cenitu.Security.Dtos.Order
         public int Id { get; set; }
         public string OrderNumber { get; set; } = default!;
         public DateTime Date { get; set; }
+        public string ProductCode { get; set; } = default!;
         public int ProductId { get; set; } = 0;
         public int Quantity { get; set; } = 0;
+        public decimal MaterialCost { get; set; } = 0;
         public string ProductDescription { get; set; } = default!;
+        //public StockTransactionDto StockTransaction { get; set; } 
     }
 }

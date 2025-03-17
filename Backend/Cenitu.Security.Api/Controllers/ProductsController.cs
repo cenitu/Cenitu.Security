@@ -82,6 +82,21 @@ namespace Cenitu.Security.Api.Controllers
             return Ok();
         }
 
+        [HttpGet("GetStocks")]
+        public async Task<IActionResult> GetStocksAsync(
+            [FromQuery(Name = "$inlinecount")] string? inlinecount,
+            [FromQuery(Name = "$skip")] int skip,
+            [FromQuery(Name = "$top")] int? top,
+            [FromQuery(Name = "$filter")] string? filter,
+            [FromQuery(Name = "$orderby")] string? orderby)
+        {
+            var stockList = await _productService.GetStocksAsync(skip, top, filter, orderby);
+            if (inlinecount == null)
+            {
+                return Ok(stockList.Items);
+            }
+            return Ok(stockList);
+        }
 
     }
 }

@@ -2,6 +2,8 @@
 @using Cenitu.Security.Dtos.Enums
 @using Cenitu.Security.Dtos.Extensions
 @using Cenitu.Security.Dtos.Product
+@using Syncfusion.Blazor.Grids
+
 @attribute [Authorize(Roles = "Admin, User")]
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
@@ -52,11 +54,12 @@
                 <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
 
                 <GridColumns>
-                    <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Center" Width="80" Visible="false" />
+                    <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
                     <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100"
                                 />
                     <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
                     <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
+                    <GridColumn Field="@nameof(ProductListDto.StockQuantity)" HeaderText="In Stock" Width="100" Format="N2" TextAlign="TextAlign.Right"/>
                     <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />
                     <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100"/>
                     <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100"/>

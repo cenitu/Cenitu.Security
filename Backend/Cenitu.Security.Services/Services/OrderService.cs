@@ -2,6 +2,7 @@
 using Cenitu.Security.DataAccess;
 using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Enums;
 using Cenitu.Security.Dtos.Order;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Cenitu.Security.Services.Services
@@ -28,13 +30,16 @@ namespace Cenitu.Security.Services.Services
         {
             var order=mapper.Map<ProductionOrder>(orderCreateDto);
                 _appDbContext.Orders.Add(order);
+            order.StockTransaction.TransactionSource = TransactionSource.Production;
+
             await _appDbContext.SaveChangesAsync();
         }
         public async Task<ApiResponse<OrderListDto>> GetOrdersAsync(int skip, int? top, string? filter, string? orderby)
         {
-            var query = _appDbContext.Orders.Include(x => x.Product).AsQueryable();
+            var query = _appDbContext.Orders.Include(x => x.Product).Include(x=>x.StockTransaction.StockTransactions).ThenInclude(x=>x.Product).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
+                filter = OrderServiceHelpers.RefineFilter(filter);
                 query = query.Where(x => x.OrderNumber.Contains(filter) || x.Product.Code.Contains(filter) || x.Product.Description.Contains(filter));
             }
             if (!string.IsNullOrEmpty(orderby))
@@ -68,6 +73,17 @@ namespace Cenitu.Security.Services.Services
                 Items = orderListDto
             };
 
+        }
+        public async Task DeleteOrderAsync(int id)
+        {
+            var order = await _appDbContext.Orders.FindAsync(id);
+            if (order == null)
+            {
+                throw new Exception("Order not found");
+            }
+            var transaction = await _appDbContext.StockTransactions.FindAsync(order.StockTransactionId);
+            _appDbContext.StockTransactions.Remove(transaction!);
+            await _appDbContext.SaveChangesAsync();
         }
     }
 }

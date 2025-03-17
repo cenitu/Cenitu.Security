@@ -10,7 +10,7 @@ namespace Cenitu.Security.Dtos.Order
     public class ProductionOrderCreateDto
     {
         public string OrderNumber { get; set; } = default!;
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; }=DateTime.Now;
         public int ProductId { get; set; }
         public int Quantity { get; set; }
         public int StockTransactionId { get; set; }

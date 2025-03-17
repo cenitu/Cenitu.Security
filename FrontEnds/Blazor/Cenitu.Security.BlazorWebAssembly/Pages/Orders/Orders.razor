@@ -48,13 +48,16 @@
                 
                 <SfDataManager HttpClientInstance="@httpClient" Url="/orders" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
                 <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
-                <GridPageSettings PageSize="8"></GridPageSettings>
+                <GridPageSettings PageSize="10"></GridPageSettings>
 
                 <GridColumns>
                     <GridColumn Field="@nameof(OrderListDto.Id)" HeaderText="ID" Width="50" />
                     <GridColumn Field="@nameof(OrderListDto.OrderNumber)" HeaderText="Code" Width="120" />
                     <GridColumn Field="@nameof(OrderListDto.Date)" HeaderText="Date" Width="250" Format="dd.MM.yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Right"   />
+                    <GridColumn Field="@nameof(OrderListDto.ProductCode)"  HeaderText="Product Code" Width="150" />
                     <GridColumn Field="@nameof(OrderListDto.ProductDescription)" HeaderText="Description" Width="250" />
+                    <GridColumn Field="@nameof(OrderListDto.Quantity)" HeaderText="Quantity" Width="100" />
+                    <GridColumn Field="@nameof(OrderListDto.MaterialCost)" HeaderText="MaterialCost" Width="100" />
         @* <GridColumn HeaderText="Product" Width="250">
             <Template>
                 @{

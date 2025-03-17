@@ -8,6 +8,7 @@ namespace Cenitu.Security.Dtos.Product
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
         public string PrimaryUnitSymbol { get; set; } = default!;
+        public decimal StockQuantity { get; set; } = 0;
         public ProductType ProductType { get; set; }
         public ProductTrackingType ProductTrackingType { get; set; }
 

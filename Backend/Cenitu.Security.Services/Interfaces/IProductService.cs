@@ -1,6 +1,7 @@
 ﻿using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos;
 using Cenitu.Security.Dtos.Product;
+using Cenitu.Security.Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace Cenitu.Security.Services.Interfaces
         Task<ProductCreateDto> AddProductAsync(ProductCreateDto productCreateDto);
         Task<ProductUpdateDto> GetProductAsync(int Id);
         Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby);
+        Task<ApiResponse<StockListDto>> GetStocksAsync(int skip, int? top, string? filter, string? orderby);
         Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productDto);
     }
 }

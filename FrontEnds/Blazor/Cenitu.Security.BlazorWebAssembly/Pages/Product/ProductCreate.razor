@@ -1,7 +1,5 @@
 ﻿@page "/product/create"
-@using Cenitu.Security.Dtos.Product
-@using Cenitu.Security.Dtos.Unit
-@using System.Security.Claims
+
 @inject IHttpClientFactory HttpClientFactory
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -48,9 +46,9 @@
                         <option value="@unit.Id">@unit.Symbol</option>
                     }
                 </select>
-                <SfDropDownList TValue="int?" TItem="UnitDto" @bind-Value="@selectedUnitId" DataSource="@availableUnits">
+              @*   <SfDropDownList TValue="int?" TItem="UnitDto" @bind-Value="@selectedUnitId" DataSource="@availableUnits">
                     <DropDownListFieldSettings Value="Symbol"></DropDownListFieldSettings>
-                </SfDropDownList>
+                </SfDropDownList> *@
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-success w-100" @onclick="AddUnit">Add Unit</button>

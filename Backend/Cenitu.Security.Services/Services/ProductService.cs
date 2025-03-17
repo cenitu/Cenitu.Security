@@ -2,6 +2,7 @@
 using Cenitu.Security.DataAccess;
 using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Enums;
 using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -116,9 +117,8 @@ namespace Cenitu.Security.Services.Services
                 .Include(x=>x.LastModifiedBy).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
-                var matches = Regex.Matches(filter, @"'([^']*)'");
-                var filterValues = matches.Cast<Match>().Select(m => m.Groups[1].Value).ToList();
-                filter = filterValues.First();
+               
+                filter = OrderServiceHelpers.RefineFilter(filter);
                 query = query.Where(x => x.Code.Contains(filter) || x.Description.Contains(filter) || x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit.Symbol.Contains(filter));
             }
             if (!string.IsNullOrEmpty(orderby))
@@ -156,7 +156,17 @@ namespace Cenitu.Security.Services.Services
                 query = query.Take(top.Value);
             }
             var products = await query.ToListAsync();
+            var stockTransactionLines = await context.StockTransactionLines.Where(st=>products.Select(p=>p.Id).ToList().Contains(st.ProductId)).ToListAsync();
+           
             var productListDto = mapper.Map<List<ProductListDto>>(products);
+
+            foreach (var product in productListDto)
+            {
+                product.StockQuantity = stockTransactionLines.Where(stl => stl.ProductId == product.Id).Sum(stl =>
+                    stl.TransactionType == TransactionType.Input ? -stl.Quantity :
+                    stl.TransactionType == TransactionType.Output ? stl.Quantity : 0);
+            }
+
             return new ApiResponse<ProductListDto>
             {
                 Count = count,
@@ -165,7 +175,25 @@ namespace Cenitu.Security.Services.Services
         }
 
 
-
+        public async Task<ApiResponse<StockListDto>> GetStocksAsync(int skip, int? top, string? filter, string? orderby)
+        {
+            var result = await context.StockTransactionLines
+            .Include(stl => stl.Product)  // Product'ı dahil et
+            .GroupBy(stl => new { stl.Product.Code, stl.Product.Description })  // Code ve Description'a göre gruplama
+            .Select(g => new StockListDto
+            {
+                Code = g.Key.Code,
+                Description = g.Key.Description,
+                TotalQuantity = g.Sum(stl =>
+                    stl.TransactionType == TransactionType.Input ? -stl.Quantity :
+                    stl.TransactionType == TransactionType.Output ? stl.Quantity : 0)
+            }).ToListAsync();
+            return new ApiResponse<StockListDto>
+            {
+                Items = result,
+                Count = result.Count
+            };
+        }
 
     }
 }

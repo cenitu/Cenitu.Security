@@ -18,7 +18,7 @@ namespace Cenitu.Security.DataAccess
         public DbSet<ProductionOrder> Orders { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<StockTransaction> StockTransactions { get; set; }
-        public DbSet<StockTransactionLine> stockTransactionLines { get; set; }
+        public DbSet<StockTransactionLine> StockTransactionLines { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
