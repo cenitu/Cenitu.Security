@@ -31,6 +31,7 @@ namespace Cenitu.Security.Services.Services
             var order=mapper.Map<ProductionOrder>(orderCreateDto);
                 _appDbContext.Orders.Add(order);
             order.StockTransaction.TransactionSource = TransactionSource.Production;
+            order.StockTransaction.Date = order.Date;
 
             await _appDbContext.SaveChangesAsync();
         }

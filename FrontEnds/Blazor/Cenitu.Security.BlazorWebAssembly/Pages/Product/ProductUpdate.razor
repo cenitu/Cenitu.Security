@@ -14,17 +14,19 @@
     <div class="card shadow-lg p-4">
         <div class="row">
             <div class="col-md-6">
-                <label class="form-label" for="Code">Product Code</label>
-                <input type="text" class="form-control" @bind="product.Code" required id="Code" name="codeInput" />
+                 <label class="form-label fw-bold" for="Code">Product Code</label>
+               @* <input type="text" class="form-control" @bind="product.Code" required id="Code" name="codeInput" /> *@
+                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="FloatLabelType.Never" Placeholder="Enter Product Code" />
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="Description">Product Description</label>
-                <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" />
+                <label class="form-label fw-bold" for="Description">Product Description</label>
+               @*  <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" /> *@
+                <SfTextBox @bind-value="product.Description" FloatLabelType="FloatLabelType.Never" Placeholder="Enter Product Description" />
             </div>
         </div>
         <div class="row mt-3">
             <div class="col-md-6">
-                <label class="form-label">Product Type</label>
+                <label class="form-label fw-bold">Product Type</label>
                 <select class="form-control" @bind="product.ProductType">
                     <option value="">-- Select a Product Type --</option>
                     @foreach (var type in productTypes)
@@ -32,18 +34,17 @@
                         <option value="@type.Value">@type.Text</option>
                     }
                 </select>
+
+
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Product Type</label>
-                <SfNumericTextBox @bind-Value="product.Weight" FloatLabelType="FloatLabelType.Auto" Placeholder="Enter Product Weight"  />
-            </div>
+
         </div>
         <hr class="my-4" />
 
         <h4 class="text-center text-secondary">Product Units</h4>
         <div class="row">
             <div class="col-md-5">
-                <label class="form-label">Select Unit</label>
+                <label class="form-label fw-bold">Select Unit</label>
                 <select class="form-control" @bind="selectedUnitId">
                     <option value="">-- Select a Unit --</option>
                     @foreach (var unit in availableUnits)
@@ -51,6 +52,7 @@
                         <option value="@unit.Id">@unit.Symbol</option>
                     }
                 </select>
+              
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-success w-100" @onclick="AddUnit">Add Unit</button>
@@ -65,6 +67,7 @@
                         <th>Primary</th>
                         <th>Unit</th>
                         <th>Conversion Factor</th>
+                        <th>Weight</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -73,11 +76,20 @@
                     {
                         <tr>
                             <td>
-                                <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" />
+                                @* <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" /> *@
+                                <SfRadioButton Name="primaryUnit"
+                                               Value="@unit.UnitSymbol"
+                                               @bind-Checked="SelectedPrimaryUnit"
+                                               @onclick="() => SetPrimaryUnit(unit)" />
                             </td>
                             <td>@unit.UnitSymbol</td>
                             <td>
-                                <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" />
+                                @*  <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" /> *@
+                                <SfNumericTextBox TValue="decimal" @bind-Value="unit.ConversionFactor" Placeholder="Enter Conversion Factor" Step="0.01m" Min="0.01m" />
+                            </td>
+                            <td>
+
+                                <SfNumericTextBox TValue="decimal" @bind-Value="unit.Weight" Placeholder="Enter Product Weight" Step="0.1m" Min="0" />
                             </td>
                             <td>
                                 <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveUnit(unit)">❌ Remove</button>
@@ -102,12 +114,14 @@
     private List<UnitDto> allUnits = new();
     private int? selectedUnitId;
     private List<(ProductType Value, string Text)> productTypes = new();
+    private string SelectedPrimaryUnit { get; set; }
     protected override async Task OnInitializedAsync()
     {
         HttpClient = HttpClientFactory.CreateClient("Auth");
 
         // Mevcut ürün bilgilerini API'den çek
         product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"Products/{Id}") ?? new();
+        SelectedPrimaryUnit = product.ProductUnits.FirstOrDefault(u => u.IsPrimary)?.UnitSymbol!;
 
         // Mevcut tüm birimleri çek
         allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("units")) ?? [];
@@ -173,10 +187,16 @@
 
     private void SetPrimaryUnit(ProductUnitDto selectedUnit)
     {
+        // foreach (var unit in product.ProductUnits)
+        // {
+        //     unit.IsPrimary = (unit.UnitId == selectedUnit.UnitId);
+        // }
         foreach (var unit in product.ProductUnits)
         {
-            unit.IsPrimary = (unit.UnitId == selectedUnit.UnitId);
+            unit.IsPrimary = false; // Önce tüm birimlerin IsPrimary değerini sıfırla
         }
+        selectedUnit.IsPrimary = true;
+        SelectedPrimaryUnit = selectedUnit.UnitSymbol; // Seçilen birimin değerini güncelle
     }
 
     public async Task UpdateProductAsync()

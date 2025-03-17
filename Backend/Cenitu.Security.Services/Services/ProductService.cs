@@ -89,7 +89,8 @@ namespace Cenitu.Security.Services.Services
                 ProductId = product.Id,
                 UnitId = pu.UnitId,
                 IsPrimary = pu.IsPrimary,
-                ConversionFactor = pu.ConversionFactor
+                ConversionFactor = pu.ConversionFactor,
+                Weight = pu.Weight
             }).ToList();
 
             product.LastModifiedById = productUpdateDto.LastModifiedByUserName;

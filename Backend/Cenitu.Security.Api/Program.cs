@@ -70,6 +70,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddAutoMapper(typeof(MyMapper).Assembly);
 
 

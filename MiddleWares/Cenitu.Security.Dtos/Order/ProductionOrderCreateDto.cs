@@ -1,5 +1,4 @@
-﻿using Cenitu.Security.Dtos.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,18 +16,6 @@ namespace Cenitu.Security.Dtos.Order
         public StockTransactionDto StockTransaction { get; set; } = new();
 
 
-    }
-    public class StockTransactionDto
-    {
-        public List<StockTransactionLineDto> StockTransactions { get; set; } = [];
-    }
-    public class StockTransactionLineDto
-    {
-        public int ProductId { get; set; }
-        public decimal Quantity { get; set; }
-        public decimal Price { get; set; } = 0;
-        public TransactionType TransactionType { get; set; }
-        public int StockTransactionId { get; set; }
     }
 
 }

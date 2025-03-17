@@ -16,7 +16,7 @@ namespace Cenitu.Security.Domain.Entities
         [Key]
         public int UnitId { get; set; }
         public Unit Unit { get; set; } = null!;
-
+        public decimal Weight { get; set; }
         public decimal ConversionFactor { get; set; } // Ana birime dönüşüm faktörü
         public bool IsPrimary { get; set; } // Bu birim ana birim mi?
     }

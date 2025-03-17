@@ -7,7 +7,6 @@ namespace Cenitu.Security.Domain.Entities
         public int Id { get; set; }
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
-        public decimal Weight { get; set; }
         public ProductType ProductType { get; set; }
         public ProductTrackingType TrackingType { get; set; }
         public ICollection<ProductionOrder>? Orders { get; set; } = [];

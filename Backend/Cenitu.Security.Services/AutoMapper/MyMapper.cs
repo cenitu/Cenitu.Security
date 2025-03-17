@@ -3,11 +3,7 @@ using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos.Order;
 using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Dtos.Unit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Cenitu.Security.Services.Services;
 
 namespace Cenitu.Security.Services.AutoMapper
 {
@@ -32,6 +28,9 @@ namespace Cenitu.Security.Services.AutoMapper
 
             CreateMap<StockTransaction, StockTransactionDto>().ReverseMap();
             CreateMap<StockTransactionLine, StockTransactionLineDto>().ReverseMap();
+
+            CreateMap<Recipe, RecipeListDto>().ReverseMap();
+            CreateMap<RecipeLine, RecipeLineListDto>().ReverseMap();
 
         }
     }

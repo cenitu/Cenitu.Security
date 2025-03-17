@@ -6,6 +6,7 @@
         public string UnitSymbol { get; set; } = string.Empty;
         public bool IsPrimary { get; set; }
         public decimal ConversionFactor { get; set; }
+        public decimal Weight { get; set; }
         public int ProductId { get; set; }
     }
 }

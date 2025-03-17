@@ -4,6 +4,7 @@ using Cenitu.Security.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cenitu.Security.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250317212739_removedproductweight")]
+    partial class removedproductweight
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,66 +245,6 @@ namespace Cenitu.Security.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Orders", (string)null);
-                });
-
-            modelBuilder.Entity("Cenitu.Security.Domain.Entities.Recipe", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Recipes", (string)null);
-                });
-
-            modelBuilder.Entity("Cenitu.Security.Domain.Entities.RecipeLine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<int>("RecipeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("RecipeId");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("RecipeLines", (string)null);
                 });
 
             modelBuilder.Entity("Cenitu.Security.Domain.Entities.SalesOrder", b =>
@@ -570,44 +513,6 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.Navigation("StockTransaction");
                 });
 
-            modelBuilder.Entity("Cenitu.Security.Domain.Entities.Recipe", b =>
-                {
-                    b.HasOne("Cenitu.Security.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Cenitu.Security.Domain.Entities.RecipeLine", b =>
-                {
-                    b.HasOne("Cenitu.Security.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Cenitu.Security.Domain.Entities.Recipe", "Recipe")
-                        .WithMany("RecipeLines")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Cenitu.Security.Domain.Entities.Unit", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Recipe");
-
-                    b.Navigation("Unit");
-                });
-
             modelBuilder.Entity("Cenitu.Security.Domain.Entities.SalesOrder", b =>
                 {
                     b.HasOne("Cenitu.Security.Domain.Entities.StockTransaction", "StockTransaction")
@@ -694,11 +599,6 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("ProductUnits");
-                });
-
-            modelBuilder.Entity("Cenitu.Security.Domain.Entities.Recipe", b =>
-                {
-                    b.Navigation("RecipeLines");
                 });
 
             modelBuilder.Entity("Cenitu.Security.Domain.Entities.StockTransaction", b =>

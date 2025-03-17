@@ -13,12 +13,12 @@ namespace Cenitu.Security.Domain.Entities
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
         public int ProductId { get; set; }
-        public Product Product { get; set; }
+        public Product Product { get; set; } = null!;
         public decimal RecipeWeight
         {
             get
             {
-                return RecipeLines.Sum(rl => rl.Quantity * rl.Product.Weight);
+                return RecipeLines.Sum(rl => rl.Weight);
             }
         }
         public ICollection<RecipeLine> RecipeLines { get; set; } = [];
