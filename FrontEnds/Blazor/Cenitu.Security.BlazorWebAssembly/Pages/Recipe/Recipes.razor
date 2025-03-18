@@ -1,4 +1,5 @@
-﻿@page "/products"
+﻿@page "/recipes"
+@using Cenitu.Security.Dtos.Recipe
 
 @attribute [Authorize(Roles = "Admin, User")]
 @inject NavigationManager NavigationManager
@@ -24,9 +25,9 @@
                     </SfButton>
                 </div>
             </div>
-            <SfGrid ID="ProductsGrid"
+            <SfGrid ID="RecipeGrid"
                     @ref="DefaultGrid"
-                    TValue="ProductListDto"
+                    TValue="RecipeListDto"
                     AllowPaging="true"
                     AllowSorting="true"
                     AllowFiltering="true"
@@ -39,28 +40,18 @@
                     RowHeight="35"
                     Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
                     ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
-
-
-                <SfDataManager HttpClientInstance="@httpClient" Url="/products" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
-
-
+                <SfDataManager HttpClientInstance="@httpClient" Url="/recipe" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
                 <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="false" Mode="EditMode.Normal"></GridEditSettings>
-                <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="ProductListDto"></GridEvents>
+                <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="RecipeListDto"></GridEvents>
                 <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
                 <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
-
                 <GridColumns>
-                    <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
-                    <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100"
-                                />
-                    <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
-                    <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
-                    <GridColumn Field="@nameof(ProductListDto.StockQuantity)" HeaderText="In Stock" Width="100" Format="N2" TextAlign="TextAlign.Right"/>
-                    <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />
-                    <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100"/>
-                    <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100"/>
-                    <GridColumn Field="@nameof(ProductListDto.LastModifiedByUserName)" HeaderText="Last Modified By" Width="100" />
-                    <GridColumn Field="@nameof(ProductListDto.LastModifiedDate)" HeaderText="Last Modified Date" Width="100" />
+                    <GridColumn Field="@nameof(RecipeListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
+                    <GridColumn Field="@nameof(RecipeListDto.Code)" HeaderText="Code" Width="100" />
+                    <GridColumn Field="@nameof(RecipeListDto.Description)" HeaderText="Description" Width="80" />
+                    <GridColumn Field="@nameof(RecipeListDto.ProductCode)" HeaderText="Product Code" Width="200" />
+                    <GridColumn Field="@nameof(RecipeListDto.ProductDescription)" HeaderText="Product Description" Width="100" />
+                    <GridColumn Field="@nameof(RecipeListDto.RecipeWeight)" HeaderText="Weight" Width="50" Format="N2" TextAlign="TextAlign.Right" />
                 </GridColumns>
             </SfGrid>
         </div>
@@ -99,10 +90,10 @@
 </style>
 
 @code {
-    SfGrid<ProductListDto>? DefaultGrid;
+    SfGrid<RecipeListDto>? DefaultGrid;
     private HttpClient? httpClient;
     // private List<ProductListDto> ProductList = new();
-    private int? SelectedProductId;
+    private int? SelectedRecipeId;
 
     protected override void OnInitialized()
     {
@@ -113,7 +104,7 @@
 
     private void Add()
     {
-        NavigationManager.NavigateTo("product/create");
+        NavigationManager.NavigateTo("recipe/create");
     }
 
     private void Update()
@@ -121,11 +112,11 @@
         var selectedProduct = DefaultGrid?.SelectedRecords.FirstOrDefault();
         if (selectedProduct != null)
         {
-            NavigationManager.NavigateTo($"product/update/{selectedProduct.Id}");
+            NavigationManager.NavigateTo($"recipe/update/{selectedProduct.Id}");
         }
         else
         {
-            JSRuntime.InvokeVoidAsync("alert", "Please select a product to update.");
+            JSRuntime.InvokeVoidAsync("alert", "Please select a recipe to update.");
         }
     }
 
@@ -134,7 +125,7 @@
     private async Task ExportToExcel()
     {
         ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-        ExcelProperties.FileName = "Products.xlsx";
+        ExcelProperties.FileName = "Recipes.xlsx";
         await DefaultGrid!.ExportToExcelAsync(ExcelProperties);
 
     }
@@ -142,14 +133,14 @@
     private async Task ExportToPdf()
     {
         PdfExportProperties PdfProperties = new PdfExportProperties();
-        PdfProperties.FileName = "Products.pdf";
+        PdfProperties.FileName = "Recipes.pdf";
         await DefaultGrid!.ExportToPdfAsync(PdfProperties);
 
 
     }
 
-    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<ProductListDto> args)
+    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<RecipeListDto> args)
     {
-        NavigationManager.NavigateTo($"product/update/{args.RowData.Id}");
+        NavigationManager.NavigateTo($"recipe/update/{args.RowData.Id}");
     }
 }

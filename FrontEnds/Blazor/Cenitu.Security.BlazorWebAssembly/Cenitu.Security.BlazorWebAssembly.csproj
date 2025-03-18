@@ -19,6 +19,7 @@
 		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.2" />
 		<PackageReference Include="Syncfusion.Blazor.Grid" Version="28.2.5" />
 		<PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Blazor.MultiColumnCombobox" Version="28.2.5" />
 	</ItemGroup>
 
 	<ItemGroup>

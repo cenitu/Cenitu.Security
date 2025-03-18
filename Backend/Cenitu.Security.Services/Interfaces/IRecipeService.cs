@@ -1,9 +1,12 @@
-﻿using Cenitu.Security.Services.Services;
+﻿using Cenitu.Security.Dtos;
+using Cenitu.Security.Dtos.Recipe;
 
 namespace Cenitu.Security.Services.Interfaces
 {
     public interface IRecipeService
     {
-        Task<IEnumerable<RecipeListDto>> GetRecipesAsync();
+        Task<RecipeCreateDto> CreateRecipeAsync(RecipeCreateDto recipeDto);
+        Task<RecipeListDto> GetRecipeAsync(int id);
+        Task<ApiResponse<RecipeListDto>> GetRecipesAsync(int skip, int? top, string? filter, string? orderby);
     }
 }

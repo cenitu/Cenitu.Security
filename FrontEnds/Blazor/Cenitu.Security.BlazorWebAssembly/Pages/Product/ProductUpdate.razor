@@ -16,12 +16,12 @@
             <div class="col-md-6">
                  <label class="form-label fw-bold" for="Code">Product Code</label>
                @* <input type="text" class="form-control" @bind="product.Code" required id="Code" name="codeInput" /> *@
-                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="FloatLabelType.Never" Placeholder="Enter Product Code" />
+                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Never" Placeholder="Enter Product Code" />
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-bold" for="Description">Product Description</label>
                @*  <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" /> *@
-                <SfTextBox @bind-value="product.Description" FloatLabelType="FloatLabelType.Never" Placeholder="Enter Product Description" />
+                <SfTextBox @bind-value="product.Description" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Never" Placeholder="Enter Product Description" />
             </div>
         </div>
         <div class="row mt-3">
@@ -52,7 +52,7 @@
                         <option value="@unit.Id">@unit.Symbol</option>
                     }
                 </select>
-              
+
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-success w-100" @onclick="AddUnit">Add Unit</button>
@@ -75,24 +75,35 @@
                     @foreach (var unit in product.ProductUnits)
                     {
                         <tr>
-                            <td>
-                                @* <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" /> *@
-                                <SfRadioButton Name="primaryUnit"
-                                               Value="@unit.UnitSymbol"
-                                               @bind-Checked="SelectedPrimaryUnit"
-                                               @onclick="() => SetPrimaryUnit(unit)" />
+                            <td class="align-middle text-center">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <SfRadioButton Name="primaryUnit"
+                                    Value="@unit.UnitSymbol"
+                                    @bind-Checked="SelectedPrimaryUnit"
+                                    @onclick="() => SetPrimaryUnit(unit)" />
+                                </div>
                             </td>
-                            <td>@unit.UnitSymbol</td>
-                            <td>
-                                @*  <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" /> *@
-                                <SfNumericTextBox TValue="decimal" @bind-Value="unit.ConversionFactor" Placeholder="Enter Conversion Factor" Step="0.01m" Min="0.01m" />
+                            <td class="align-middle">1 @unit.UnitSymbol</td>
+                            <td class="align-middle position-relative">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <SfNumericTextBox TValue="decimal" @bind-Value="unit.ConversionFactor"
+                                    Placeholder="Enter Conversion Factor"
+                                    Step="0.01m" Min="0.01m"
+                                    CssClass="numeric-with-suffix" />
+                                    <span class="unit-suffix">@product.ProductUnits.FirstOrDefault(pu => pu.IsPrimary)?.UnitSymbol</span>
+                                </div>
                             </td>
-                            <td>
-
-                                <SfNumericTextBox TValue="decimal" @bind-Value="unit.Weight" Placeholder="Enter Product Weight" Step="0.1m" Min="0" />
+                            <td class="align-middle position-relative">
+                                <SfNumericTextBox TValue="decimal" @bind-Value="unit.Weight"
+                                Placeholder="Enter Product Weight"
+                                Step="0.1m" Min="0"
+                                CssClass="numeric-with-suffix" />
+                                <span class="unit-suffix">kg</span>
                             </td>
-                            <td>
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveUnit(unit)">❌ Remove</button>
+                            <td class="align-middle">
+                                <button class="btn btn-outline-danger btn-sm px-3" @onclick="() => RemoveUnit(unit)">
+                                    ❌ Remove
+                                </button>
                             </td>
                         </tr>
                     }
@@ -106,6 +117,29 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* NumericTextBox içindeki değer sağa hizalanacak */
+    .numeric-with-suffix {
+    padding-right: 2rem;
+    text-align: right;
+    }
+
+    /* NumericTextBox sağındaki birim sembolü düzgün hizalanacak */
+    .unit-suffix {
+    position: absolute;
+    right: 10px;
+    font-weight: bold;
+    color: #6c757d;
+    line-height: 2.2; /* NumericTextBox ile hizalamak için */
+    vertical-align: middle;
+    }
+
+    /* Radiobutton ve NumericTextBox hizasını eşitlemek için */
+    .align-middle {
+    vertical-align: middle !important;
+    }
+</style>
 
 @code {
     [Parameter] public int Id { get; set; }
@@ -191,9 +225,12 @@
         // {
         //     unit.IsPrimary = (unit.UnitId == selectedUnit.UnitId);
         // }
+        // var previousPrimaryUnit = product.ProductUnits.FirstOrDefault(u => u.IsPrimary);
+        var cf = selectedUnit.ConversionFactor;
         foreach (var unit in product.ProductUnits)
         {
             unit.IsPrimary = false; // Önce tüm birimlerin IsPrimary değerini sıfırla
+            unit.ConversionFactor = unit.ConversionFactor /cf;
         }
         selectedUnit.IsPrimary = true;
         SelectedPrimaryUnit = selectedUnit.UnitSymbol; // Seçilen birimin değerini güncelle

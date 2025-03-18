@@ -2,8 +2,8 @@
 using Cenitu.Security.Domain.Entities;
 using Cenitu.Security.Dtos.Order;
 using Cenitu.Security.Dtos.Product;
+using Cenitu.Security.Dtos.Recipe;
 using Cenitu.Security.Dtos.Unit;
-using Cenitu.Security.Services.Services;
 
 namespace Cenitu.Security.Services.AutoMapper
 {
@@ -31,6 +31,8 @@ namespace Cenitu.Security.Services.AutoMapper
 
             CreateMap<Recipe, RecipeListDto>().ReverseMap();
             CreateMap<RecipeLine, RecipeLineListDto>().ReverseMap();
+            CreateMap<RecipeCreateDto, Recipe>().ReverseMap();
+            CreateMap<RecipeLineCreateDto, RecipeLine>().ReverseMap();
 
         }
     }

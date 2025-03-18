@@ -14,7 +14,7 @@
                 @* <label class="form-label" for="Code">Product Code</label> *@
    @*              <input type="text" class="form-control" @bind="product.Code" autofocus required id="Code" name="codeInput" placeholder="Enter Product Code" /> *@
 
-                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="FloatLabelType.Auto" placeholder="Enter Product Code" />
+                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" placeholder="Enter Product Code" />
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="Description">Product Description</label>
@@ -73,9 +73,9 @@
                             <td>
                                 <input type="radio" name="primaryUnit" checked="@unit.IsPrimary" @onclick="() => SetPrimaryUnit(unit)" />
                             </td>
-                            <td>@unit.UnitSymbol</td>
+                            <td>1 @unit.UnitSymbol</td>
                             <td>
-                                <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" />
+                                <input type="number" class="form-control w-50 mx-auto" @bind="unit.ConversionFactor" min="0.0001" step="0.0001" /> @product.ProductUnits.Where(pu => pu.IsPrimary).FirstOrDefault()!.UnitSymbol)
                             </td>
                             <td>
                                 <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveUnit(unit)">❌ Remove</button>
