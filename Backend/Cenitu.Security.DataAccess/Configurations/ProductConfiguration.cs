@@ -14,7 +14,12 @@ namespace Cenitu.Security.DataAccess.Configurations
         {
             builder.HasKey(p => p.Id);
             builder.Property(p => p.Code).HasMaxLength(20).IsRequired();
+            builder.HasIndex(p=> p.Code).IsUnique();
             builder.Property(p => p.Description).HasMaxLength(200).IsRequired();
+            builder.Property(p => p.ProductType).HasConversion<byte>();
+            builder.Property(p => p.TrackingType).HasConversion<byte>();
+            builder.Property(p => p.StockQuantity).HasPrecision(19, 3);
+
             //builder.Property(p=>p.PrimaryUnitSymbol).HasMaxLength(10);
             builder.ToTable("Products");
         }

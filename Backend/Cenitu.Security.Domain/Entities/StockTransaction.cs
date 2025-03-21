@@ -6,10 +6,10 @@ namespace Cenitu.Security.Domain.Entities
     {
         public int Id { get; set; }
         public TransactionSource TransactionSource { get; set; }
+        public StockTransactionStatus Status { get; set; }
         public DateTime Date { get; set; }
         public ICollection<StockTransactionLine> StockTransactions { get; set; } = [];
     }
-
 
 
 }

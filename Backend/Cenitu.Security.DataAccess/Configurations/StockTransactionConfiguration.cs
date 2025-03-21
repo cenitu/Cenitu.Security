@@ -14,6 +14,8 @@ namespace Cenitu.Security.DataAccess.Configurations
         public void Configure(EntityTypeBuilder<StockTransaction> builder)
         {
             builder.HasKey(t => t.Id);
+            builder.Property(t => t.TransactionSource).HasConversion<byte>();
+            builder.Property(t => t.Status).HasConversion<byte>();
             builder.ToTable("StockTransactions");
         }
     }

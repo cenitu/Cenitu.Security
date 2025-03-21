@@ -39,16 +39,34 @@
 
 <div class="card shadow-lg p-4">
     <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="AddMaterial"> Add Material </SfButton>
-    @foreach (var trLine in order.StockTransaction.StockTransactions.Where(st => st.TransactionType == TransactionType.Input))
+    @foreach (var trLine in order.StockTransaction.StockTransactions.Where(st => st.TransactionType == TransactionType.Output))
     {
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <SfDropDownList TValue="int" TItem="ProductListDto" @bind-Value="trLine.ProductId" DataSource="@products" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Select Product">
                     <DropDownListFieldSettings Text="Description" Value="Id"></DropDownListFieldSettings>
                 </SfDropDownList>
             </div>
-            <div class="col-md-3">
-                <SfNumericTextBox @bind-Value=trLine.Quantity FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Quantity" />
+            <div class="col-md-2">
+                <SfNumericTextBox @bind-Value=trLine.TransactionUnitQuantity FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Quantity" />
+            </div>
+            <div class="col-md-2">
+                @if (trLine.ProductId > 0)
+                {
+                    var product = products.FirstOrDefault(pr => pr.Id == trLine.ProductId)!;
+                    if (trLine.UnitId == 0)
+                    {
+                        trLine.UnitId = product.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()?.UnitId ?? 0;
+                    }
+
+                    <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductUnitDto" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" @bind-Value="trLine.UnitId" DataSource="@product.ProductUnits" Placeholder="Select Unit">
+                        <ComboBoxFieldSettings Text="UnitSymbol" Value="UnitId"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                }
+                else
+                {
+                    <SfComboBox TValue="int" Enabled="false" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" TItem="ProductUnitDto"></SfComboBox>
+                }
             </div>
             <div class="col-md-3">
                 <SfNumericTextBox @bind-Value=trLine.Price FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Cost" />
@@ -73,15 +91,16 @@
     private void AddMaterial(MouseEventArgs args)
     {
         var newLine = new StockTransactionLineDto();
-        newLine.TransactionType = TransactionType.Input;
+        newLine.TransactionType = TransactionType.Output;
         order.StockTransaction.StockTransactions.Add(new StockTransactionLineDto());
     }
     private async Task Save(MouseEventArgs args)
     {
         var outputLine = new StockTransactionLineDto();
-        outputLine.TransactionType = TransactionType.Output;
+        outputLine.TransactionType = TransactionType.Input;
         outputLine.ProductId = order.ProductId;
-        outputLine.Quantity = order.Quantity;
+        outputLine.TransactionUnitQuantity = order.Quantity;
+        outputLine.UnitId = products.FirstOrDefault(p => p.Id == order.ProductId)?.ProductUnits.FirstOrDefault(pu => pu.IsPrimary)?.UnitId ?? 0;
         order.StockTransaction.StockTransactions.Add(outputLine);
         var result = await HttpClient.PostAsJsonAsync("orders", order);
         if (result.IsSuccessStatusCode)

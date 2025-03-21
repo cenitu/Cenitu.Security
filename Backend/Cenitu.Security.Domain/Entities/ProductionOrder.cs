@@ -19,7 +19,7 @@ namespace Cenitu.Security.Domain.Entities
         {
             get
             {
-                return StockTransaction.StockTransactions.Where(st => st.TransactionType == TransactionType.Input).Sum(st => st.Price * st.Quantity);
+                return StockTransaction.StockTransactions.Where(st => st.TransactionType == TransactionType.Input).Sum(st => st.Price * st.TransactionUnitQuantity);
             }
 
         }

@@ -88,7 +88,8 @@
                                 <div class="d-flex align-items-center justify-content-center">
                                     <SfNumericTextBox TValue="decimal" @bind-Value="unit.ConversionFactor"
                                     Placeholder="Enter Conversion Factor"
-                                    Step="0.01m" Min="0.01m"
+                                    Step="0.1m" Min="0"
+                                    Format="N3"
                                     CssClass="numeric-with-suffix" />
                                     <span class="unit-suffix">@product.ProductUnits.FirstOrDefault(pu => pu.IsPrimary)?.UnitSymbol</span>
                                 </div>
@@ -96,6 +97,7 @@
                             <td class="align-middle position-relative">
                                 <SfNumericTextBox TValue="decimal" @bind-Value="unit.Weight"
                                 Placeholder="Enter Product Weight"
+                                Format="N3"
                                 Step="0.1m" Min="0"
                                 CssClass="numeric-with-suffix" />
                                 <span class="unit-suffix">kg</span>

@@ -28,16 +28,25 @@ namespace Cenitu.Security.Services.Services
         }
         public async Task AddOrderAsync(ProductionOrderCreateDto orderCreateDto)
         {
-            var order=mapper.Map<ProductionOrder>(orderCreateDto);
-                _appDbContext.Orders.Add(order);
+            
+            var order = mapper.Map<ProductionOrder>(orderCreateDto);
+            
+            var transactionLines = order.StockTransaction.StockTransactions;
             order.StockTransaction.TransactionSource = TransactionSource.Production;
             order.StockTransaction.Date = order.Date;
 
+            var producrIds = transactionLines.Select(x => x.ProductId).ToList();
+            var products = await _appDbContext.Products.Where(x => producrIds.Contains(x.Id)).ToListAsync();
+            foreach (var item in products)
+            {
+                item.StockQuantity += transactionLines.First(x => x.ProductId == item.Id).PrimaryUnitQuantity;
+            }
+            _appDbContext.Orders.Add(order);
             await _appDbContext.SaveChangesAsync();
         }
         public async Task<ApiResponse<OrderListDto>> GetOrdersAsync(int skip, int? top, string? filter, string? orderby)
         {
-            var query = _appDbContext.Orders.Include(x => x.Product).Include(x=>x.StockTransaction.StockTransactions).ThenInclude(x=>x.Product).AsQueryable();
+            var query = _appDbContext.Orders.Include(x => x.Product).Include(x => x.StockTransaction.StockTransactions).ThenInclude(x => x.Product).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
                 filter = OrderServiceHelpers.RefineFilter(filter);

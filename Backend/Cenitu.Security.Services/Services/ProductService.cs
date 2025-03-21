@@ -17,7 +17,7 @@ namespace Cenitu.Security.Services.Services
         private readonly IMapper mapper;
         private readonly AppDbContext context;
 
-        public ProductService(AppDbContext context, IMapper mapper )
+        public ProductService(AppDbContext context, IMapper mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -43,7 +43,7 @@ namespace Cenitu.Security.Services.Services
             var product = mapper.Map<Product>(productCreateDto);
             product.CreatedById = productCreateDto.CreatedByUserName;
             //product.CreatedBy = user;
-            product.CreatedDate= DateTime.Now;
+            product.CreatedDate = DateTime.Now;
             product.ProductUnits = [.. productCreateDto.ProductUnits.Select(pu => new ProductUnit
             {
                 UnitId = pu.UnitId,
@@ -60,7 +60,7 @@ namespace Cenitu.Security.Services.Services
             //    });
             //}
             context.Products.Add(product);
-           
+
             var result = await context.SaveChangesAsync();
 
             if (result == 0)
@@ -76,9 +76,15 @@ namespace Cenitu.Security.Services.Services
         {
             //var user = await userManager.FindByEmailAsync(productUpdateDto.LastModifiedByUserName!);
             var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
-            if (product == null )
+            if (product == null)
             {
                 throw new Exception("Product not found");
+            }
+
+            if (product.PrimaryUnit!.Id != productUpdateDto.ProductUnits.FirstOrDefault(x => x.IsPrimary)!.UnitId)
+            {
+                var transactionLines = context.StockTransactionLines.Include(x => x.Product).ThenInclude(x => x.ProductUnits).Where(x => x.ProductId == product.Id).ToList();
+                product.StockQuantity /= product.ProductUnits!.FirstOrDefault(x => x.UnitId == productUpdateDto.ProductUnits.FirstOrDefault(x => x.IsPrimary)!.UnitId)!.ConversionFactor;
             }
 
             // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
@@ -109,64 +115,70 @@ namespace Cenitu.Security.Services.Services
 
             //return productUpdateDto;
         }
-
         public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
         {
             var query = context.Products
                 .Include(x => x.ProductUnits!).ThenInclude(x => x.Unit)
-                .Include(x=>x.CreatedBy)
-                .Include(x=>x.LastModifiedBy).AsQueryable();
+                .Include(x => x.CreatedBy)
+                .Include(x => x.LastModifiedBy)
+                .Include(x => x.StockTransactionLines)
+                .AsQueryable();
+
             if (!string.IsNullOrEmpty(filter))
             {
-               
                 filter = OrderServiceHelpers.RefineFilter(filter);
-                query = query.Where(x => x.Code.Contains(filter) || x.Description.Contains(filter) || x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit.Symbol.Contains(filter));
+                query = query.Where(x => x.Code.Contains(filter) ||
+                                         x.Description.Contains(filter) ||
+                                         x.ProductUnits!.Any(pu => pu.IsPrimary && pu.Unit.Symbol.Contains(filter)));
             }
             if (!string.IsNullOrEmpty(orderby))
             {
                 var orderBys = orderby.Split(' ');
-                var property = typeof(Product).GetProperty(orderBys[0])!;
 
-                if (orderBys.Length == 2 && orderBys[0] == "PrimaryUnitSymbol")
+                if (orderBys[0] == "PrimaryUnitSymbol")
                 {
-                    query = query.OrderByDescending(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
-
-                }
-                else if (orderBys[0] == "PrimaryUnitSymbol")
-                {
-                    query = query.OrderBy(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
-                }
-                else if (orderBys.Length == 2)
-                {
-                    query = query.OrderByDescending(x => EF.Property<object>(x, orderBys[0]));
+                    query = orderBys.Length == 2
+                        ? query.OrderByDescending(x => x.ProductUnits!.Where(pu => pu.IsPrimary).Select(pu => pu.Unit.Symbol).FirstOrDefault())
+                        : query.OrderBy(x => x.ProductUnits!.Where(pu => pu.IsPrimary).Select(pu => pu.Unit.Symbol).FirstOrDefault());
                 }
                 else
                 {
-                    query = query.OrderBy(x => EF.Property<object>(x, orderBys[0]));
-
+                    query = orderBys.Length == 2
+                        ? query.OrderByDescending(x => EF.Property<object>(x, orderBys[0]))
+                        : query.OrderBy(x => EF.Property<object>(x, orderBys[0]));
                 }
-
-
-
-
             }
+
             var count = await query.CountAsync();
-            query = query.Skip(skip);
+
             if (top.HasValue)
             {
-                query = query.Take(top.Value);
+                query = query.Skip(skip).Take(top.Value);
             }
+            else
+            {
+                query = query.Skip(skip);
+            }
+
             var products = await query.ToListAsync();
-            var stockTransactionLines = await context.StockTransactionLines.Where(st=>products.Select(p=>p.Id).ToList().Contains(st.ProductId)).ToListAsync();
-           
+            var productIds = products.Select(p => p.Id).ToHashSet();
+
+            //var stockTransactionLines = await context.StockTransactionLines
+            //    .Where(st => productIds.Contains(st.ProductId))
+            //    .ToListAsync();
+
+            //var stockData = stockTransactionLines
+            //    .GroupBy(st => st.ProductId)
+            //    .ToDictionary(g => g.Key, g => g.Sum(stl =>
+            //        stl.TransactionType == TransactionType.Input ? -stl.Quantity :
+            //        stl.TransactionType == TransactionType.Output ? stl.Quantity : 0));
+
             var productListDto = mapper.Map<List<ProductListDto>>(products);
 
-            foreach (var product in productListDto)
-            {
-                product.StockQuantity = stockTransactionLines.Where(stl => stl.ProductId == product.Id).Sum(stl =>
-                    stl.TransactionType == TransactionType.Input ? -stl.Quantity :
-                    stl.TransactionType == TransactionType.Output ? stl.Quantity : 0);
-            }
+            //foreach (var product in productListDto)
+            //{
+            //    product.StockQuantity = stockData.TryGetValue(product.Id, out var quantity) ? quantity : 0;
+            //}
 
             return new ApiResponse<ProductListDto>
             {
@@ -174,6 +186,84 @@ namespace Cenitu.Security.Services.Services
                 Items = productListDto
             };
         }
+        public async Task UpdateProductStocksAsync()
+        {
+            var products = context.Products
+                .Include(x => x.StockTransactionLines)
+                .Include(x=>x.ProductUnits)!.ThenInclude(x=>x.Unit);
+            foreach (var product in products)
+            {
+                product.StockQuantity = product.StockTransactionLines.Sum(stl =>
+                    stl.TransactionType == TransactionType.Output ? -stl.PrimaryUnitQuantity :
+                    stl.TransactionType == TransactionType.Input ? stl.PrimaryUnitQuantity : 0);
+            }
+            await context.SaveChangesAsync();
+        }
+        //public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
+        //{
+        //    var query = context.Products
+        //        .Include(x => x.ProductUnits!).ThenInclude(x => x.Unit)
+        //        .Include(x=>x.CreatedBy)
+        //        .Include(x=>x.LastModifiedBy).AsQueryable();
+        //    if (!string.IsNullOrEmpty(filter))
+        //    {
+
+        //        filter = OrderServiceHelpers.RefineFilter(filter);
+        //        query = query.Where(x => x.Code.Contains(filter) || x.Description.Contains(filter) || x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit.Symbol.Contains(filter));
+
+        //    }
+        //    if (!string.IsNullOrEmpty(orderby))
+        //    {
+        //        var orderBys = orderby.Split(' ');
+        //        var property = typeof(Product).GetProperty(orderBys[0])!;
+
+        //        if (orderBys.Length == 2 && orderBys[0] == "PrimaryUnitSymbol")
+        //        {
+        //            query = query.OrderByDescending(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
+
+        //        }
+        //        else if (orderBys[0] == "PrimaryUnitSymbol")
+        //        {
+        //            query = query.OrderBy(x => EF.Property<object>(x.ProductUnits!.Where(x => x.IsPrimary).FirstOrDefault()!.Unit, "Symbol"));
+        //        }
+        //        else if (orderBys.Length == 2)
+        //        {
+        //            query = query.OrderByDescending(x => EF.Property<object>(x, orderBys[0]));
+        //        }
+        //        else
+        //        {
+        //            query = query.OrderBy(x => EF.Property<object>(x, orderBys[0]));
+
+        //        }
+
+
+
+
+        //    }
+        //    var count = await query.CountAsync();
+        //    query = query.Skip(skip);
+        //    if (top.HasValue)
+        //    {
+        //        query = query.Take(top.Value);
+        //    }
+        //    var products = await query.ToListAsync();
+        //    var stockTransactionLines = await context.StockTransactionLines.Where(st=>products.Select(p=>p.Id).ToList().Contains(st.ProductId)).ToListAsync();
+
+        //    var productListDto = mapper.Map<List<ProductListDto>>(products);
+
+        //    foreach (var product in productListDto)
+        //    {
+        //        product.StockQuantity = stockTransactionLines.Where(stl => stl.ProductId == product.Id).Sum(stl =>
+        //            stl.TransactionType == TransactionType.Input ? -stl.Quantity :
+        //            stl.TransactionType == TransactionType.Output ? stl.Quantity : 0);
+        //    }
+
+        //    return new ApiResponse<ProductListDto>
+        //    {
+        //        Count = count,
+        //        Items = productListDto
+        //    };
+        //}
 
 
         public async Task<ApiResponse<StockListDto>> GetStocksAsync(int skip, int? top, string? filter, string? orderby)
@@ -186,8 +276,8 @@ namespace Cenitu.Security.Services.Services
                 Code = g.Key.Code,
                 Description = g.Key.Description,
                 TotalQuantity = g.Sum(stl =>
-                    stl.TransactionType == TransactionType.Input ? -stl.Quantity :
-                    stl.TransactionType == TransactionType.Output ? stl.Quantity : 0)
+                    stl.TransactionType == TransactionType.Output ? -stl.TransactionUnitQuantity :
+                    stl.TransactionType == TransactionType.Input ? stl.TransactionUnitQuantity : 0)
             }).ToListAsync();
             return new ApiResponse<StockListDto>
             {

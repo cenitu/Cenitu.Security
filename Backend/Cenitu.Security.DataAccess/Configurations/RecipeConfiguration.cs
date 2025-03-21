@@ -15,6 +15,7 @@ namespace Cenitu.Security.DataAccess.Configurations
         {
             builder.HasKey(r => r.Id);
             builder.Property(r => r.Code).HasMaxLength(20).IsRequired();
+            builder.HasIndex(r => r.Code).IsUnique();
             builder.Property(r => r.Description).HasMaxLength(200).IsRequired();
             builder.HasOne(r => r.Product).WithMany().HasForeignKey(r => r.ProductId);
             builder.ToTable("Recipes");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cenitu.Security.Dtos.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ namespace Cenitu.Security.Dtos.Order
         public int Quantity { get; set; } = 0;
         public decimal MaterialCost { get; set; } = 0;
         public string ProductDescription { get; set; } = default!;
+        public StockTransactionStatus StockTransactionStatus { get; set; }
         //public StockTransactionDto StockTransaction { get; set; } 
     }
 }

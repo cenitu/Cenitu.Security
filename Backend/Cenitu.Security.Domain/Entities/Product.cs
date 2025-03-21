@@ -11,6 +11,7 @@ namespace Cenitu.Security.Domain.Entities
         public ProductTrackingType TrackingType { get; set; }
         public ICollection<ProductionOrder>? Orders { get; set; } = [];
         public ICollection<ProductUnit>? ProductUnits { get; set; } = [];
+        public ICollection<StockTransactionLine> StockTransactionLines { get; set; } = [];
         public Unit? PrimaryUnit
         {
             get
@@ -26,6 +27,27 @@ namespace Cenitu.Security.Domain.Entities
                 return PrimaryUnit?.Symbol;
             }
         }
+
+        private decimal _stockQuantity;
+        public decimal StockQuantity
+        {
+            get
+            {
+                return _stockQuantity;
+            }
+            set
+            { _stockQuantity=value; }
+        }
+
+      
+
+       
+
+
+
+
+
+
 
     }
 

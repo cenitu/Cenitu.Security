@@ -11,6 +11,7 @@ namespace Cenitu.Security.DataAccess.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.OrderNumber).IsRequired().HasMaxLength(50);
+            builder.HasIndex(x => x.OrderNumber).IsUnique();
             builder.Property(x => x.Date).IsRequired();
             builder.HasOne(x => x.Product).WithMany(x=>x.Orders).HasForeignKey(x => x.ProductId);
             builder.HasOne(x => x.StockTransaction).WithOne().HasForeignKey<ProductionOrder>(x=>x.StockTransactionId).OnDelete(DeleteBehavior.Cascade);

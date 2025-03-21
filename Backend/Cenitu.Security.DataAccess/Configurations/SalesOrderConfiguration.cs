@@ -15,6 +15,7 @@ namespace Cenitu.Security.DataAccess.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.InvoiceNumber).IsRequired().HasMaxLength(50);
+            builder.HasIndex(x => x.InvoiceNumber).IsUnique();
             builder.Property(x => x.CreatedDate).IsRequired();
             builder.HasOne(x => x.StockTransaction).WithOne().HasForeignKey<SalesOrder>(x => x.StockTransactionId);
             builder.ToTable("Sales");

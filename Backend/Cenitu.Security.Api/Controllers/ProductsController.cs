@@ -98,5 +98,12 @@ namespace Cenitu.Security.Api.Controllers
             return Ok(stockList);
         }
 
+        [HttpGet("UpdateStocks")]
+        public async Task<IActionResult> UpdateStocksAsync()
+        {
+            await _productService.UpdateProductStocksAsync();
+            return Ok();
+        }
+
     }
 }

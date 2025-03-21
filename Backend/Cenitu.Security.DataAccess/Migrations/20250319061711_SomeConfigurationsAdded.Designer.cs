@@ -4,6 +4,7 @@ using Cenitu.Security.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cenitu.Security.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250319061711_SomeConfigurationsAdded")]
+    partial class SomeConfigurationsAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,10 +171,6 @@ namespace Cenitu.Security.DataAccess.Migrations
 
                     b.Property<byte>("ProductType")
                         .HasColumnType("tinyint");
-
-                    b.Property<decimal>("StockQuantity")
-                        .HasPrecision(19, 3)
-                        .HasColumnType("decimal(19,3)");
 
                     b.Property<byte>("TrackingType")
                         .HasColumnType("tinyint");
@@ -389,17 +388,14 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<int>("StockTransactionId")
                         .HasColumnType("int");
 
                     b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TransactionUnitQuantity")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<int>("UnitId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -407,8 +403,6 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("StockTransactionId");
-
-                    b.HasIndex("UnitId");
 
                     b.ToTable("StockTransactionLines", (string)null);
                 });
@@ -647,7 +641,7 @@ namespace Cenitu.Security.DataAccess.Migrations
             modelBuilder.Entity("Cenitu.Security.Domain.Entities.StockTransactionLine", b =>
                 {
                     b.HasOne("Cenitu.Security.Domain.Entities.Product", "Product")
-                        .WithMany("StockTransactionLines")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -658,17 +652,9 @@ namespace Cenitu.Security.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Cenitu.Security.Domain.Entities.Unit", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Product");
 
                     b.Navigation("StockTransaction");
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -727,8 +713,6 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("ProductUnits");
-
-                    b.Navigation("StockTransactionLines");
                 });
 
             modelBuilder.Entity("Cenitu.Security.Domain.Entities.Recipe", b =>
