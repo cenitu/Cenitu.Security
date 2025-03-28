@@ -34,100 +34,150 @@
         </div>
     </div>
     <div class="row mt-3">
-        <p>Recipe Weight: @weight</p>
+        <p>Recipe Weight: @weight kg.</p>
     </div>
 </div>
-<div class="card shadow-lg p-4">
-    <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="AddMaterial"> Add Material </SfButton>
-    @if (recipe.RecipeLines.Count > 0)
-    {
-        <div class="row">
-            <div class="col-md-1">Code</div>
-            <div class="col-md-3">Description</div>
-            <div class="col-md-1">Unit</div>
-            <div class="col-md-1">Quantity</div>
-        </div>
-
-    }
-    @foreach (var recipeLine in recipe.RecipeLines)
-    {
-        <div class="row mt-2">
-
-            <div class="col-md-1">
-                @*   <SfNumericTextBox @bind-Value=trLine.Quantity FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Quantity" /> *@
-                <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductListDto" @bind-Value="recipeLine.ProductId" DataSource="@products" Placeholder="Select Product">
-                    <ComboBoxFieldSettings Text="Code" Value="Id"></ComboBoxFieldSettings>
-                </SfComboBox>
-            </div>
-            <div class="col-md-3">
-                @*        <SfNumericTextBox @bind-Value=trLine.Price FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Cost" /> *@
-                <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductListDto" @bind-Value="recipeLine.ProductId" DataSource="@products" Placeholder="Select Product">
-                    <ComboBoxFieldSettings Text="Description" Value="Id"></ComboBoxFieldSettings>
-                </SfComboBox>
-            </div>
-
-            <div class="col-md-1">
-                @if (recipeLine.ProductId > 0)
-                {
-                    recipeLine.Product = products.FirstOrDefault(pr => pr.Id == recipeLine.ProductId)!;
-                    if (recipeLine.UnitId==0)
-                    {
-                        recipeLine.UnitId = recipeLine.Product.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()?.UnitId ?? 0;
-                    }
-
-                    <SfComboBox TValue="int" AllowFiltering="true" OnChange="CalculateWeight"  Autofill=true TItem="ProductUnitDto" @bind-Value="recipeLine.UnitId" DataSource="@recipeLine.Product.ProductUnits" Placeholder="Select Unit">
-                        <ComboBoxFieldSettings Text="UnitSymbol" Value="UnitId"></ComboBoxFieldSettings>
-                    </SfComboBox>
-                }
-                else
-                {
-                    <SfComboBox TValue="int" Enabled="false" TItem="ProductUnitDto"></SfComboBox>
-                }
-
-            </div>
-            <div class="col-md-1">
-                <SfNumericTextBox @bind-Value=recipeLine.Quantity OnChange="CalculateWeight" Min="0" Step="0.01m" Placeholder="Enter Quantity" />
-            </div>
-        </div>
-    }
 
 
 
+<div class="card shadow-lg p4">
+    <div class="row">
+        <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="AddMaterial"> Add Material </SfButton>
+
+        <SfGrid ID="DefaultGrid" @ref="DefaultGrid" DataSource="recipe.RecipeLines">
+            <GridEditSettings AllowAdding="true"  AllowEditing="true"></GridEditSettings>
+            
+            <GridColumns>
+                <GridColumn Width="40">
+                    <Template>
+                        <SfButton CssClass="e-danger e-small" IconCss="e-icons e-delete" @onclick="() => RemoveLine(context)"></SfButton>
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="RM / SF" Width="80">
+                    <Template>
+                        @{
+                            var recipeLine = context as RecipeLineCreateDto;
+                        
+                        <SfSwitch @bind-Checked="recipeLine!.IsRawMaterialOrSemiFinished"></SfSwitch>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="Main / Package" Width="80">
+                    <Template>
+                        @{
+                            var recipeLine = context as RecipeLineCreateDto;
+
+                            <SfSwitch @bind-Checked="recipeLine!.IsMainIgredientOrPackaging" Width="80"></SfSwitch>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="Code" TextAlign="TextAlign.Center" Width="120">
+
+                    <Template>
+                      
+                            <SfComboBox DataSource="@products" TValue="int" TItem="ProductListDto" @bind-value="(context as RecipeLineCreateDto)!.ProductId" >
+                                <ComboBoxFieldSettings Text="Code" Value="Id"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        
+                    </Template>
+
+                </GridColumn>
+                <GridColumn HeaderText="Description" Width="250">
+                    <Template>
+                        @{
+                            var recipeLine = context as RecipeLineCreateDto;
+                            <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductListDto" @bind-value="(context as RecipeLineCreateDto)!.ProductId" DataSource="@products" Placeholder="Select Product">
+                            <ComboBoxFieldSettings Text="Description" Value="Id"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        }
+                    </Template>
+
+                </GridColumn>
+
+                <GridColumn HeaderText="Unit" Width="80">
+                    <Template>
+
+                        @if ((context as RecipeLineCreateDto) is not null && (context as RecipeLineCreateDto)!.ProductId > 0)
+                            {
+                            (context as RecipeLineCreateDto)!.Product = products.FirstOrDefault(pr => pr.Id == (context as RecipeLineCreateDto)!.ProductId)!;
+                            if ((context as RecipeLineCreateDto)!.UnitId == 0)
+                                {
+                                (context as RecipeLineCreateDto)!.UnitId = (context as RecipeLineCreateDto)!.Product.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()?.UnitId ?? 0;
+                                }
+                            <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductUnitDto" @bind-Value="(context as RecipeLineCreateDto) !.UnitId" DataSource="(context as RecipeLineCreateDto)!.Product.ProductUnits" Placeholder="Select Unit">
+                                    <ComboBoxEvents TValue="int" TItem="ProductUnitDto" ValueChange="UnitChanged"></ComboBoxEvents>
+                                    <ComboBoxFieldSettings Text="UnitSymbol" Value="UnitId"></ComboBoxFieldSettings>
+                                </SfComboBox>
+                            }
+                            else
+                            {
+                                <SfComboBox TValue="int" Enabled="false" TItem="ProductUnitDto"></SfComboBox>
+                            }
+                        
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="Quantity" >
+                    <Template>
+                        @{
+                            var recipeLine = context as RecipeLineCreateDto;
+                            <SfNumericTextBox @bind-Value=recipeLine!.Quantity Min="0" Step="0.01m" Placeholder="Enter Quantity" OnChange="CalculateWeight" />
+                        }
+                    </Template>
+                </GridColumn>
+
+            </GridColumns>
+
+        </SfGrid>
+
+    </div>
     <div class="d-flex justify-content-center mt-4">
-        <SfButton CssClass="e-primary" @onclick="Save">Save</SfButton>
+        <SfButton CssClass="e-primary" @onclick="Save"> <span class="spinner-border spinner-border-sm me-2" role="status" hidden="@(!isLoading)"></span>Save</SfButton>
     </div>
-
 </div>
+
+<div class="card shadow-lg p4">
+    <div class="row"></div>
+</div>
+
 
 @code {
+
+    private List<string> ToolbarItems = new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" };
+    private SfGrid<RecipeLineCreateDto>? DefaultGrid;
     private RecipeCreateDto recipe = new RecipeCreateDto();
     private List<ProductListDto> products = new List<ProductListDto>();
     private decimal weight = 0m;
+    private bool isLoading = false;
     override protected async Task OnInitializedAsync()
     {
         HttpClient = HttpClientFactory.CreateClient("Auth");
         products = await HttpClient.GetFromJsonAsync<List<ProductListDto>>("products") ?? [];
-        AddNewLine(5);
+        AddNewLine(2);
+
     }
     private void AddMaterial(MouseEventArgs args)
     {
         AddNewLine(1);
 
+
+
     }
 
-    private void AddNewLine(int multiplier)
+    private async void AddNewLine(int multiplier)
     {
         for (int i = 0; i < multiplier; i++)
         {
             recipe.RecipeLines.Add(new RecipeLineCreateDto());
         }
+        await DefaultGrid!.Refresh();
     }
 
     private async Task Save(MouseEventArgs args)
     {
-
+        isLoading = true;
         recipe.RecipeLines.RemoveAll(rl => rl.ProductId == 0);
         var result = await HttpClient.PostAsJsonAsync("recipe", recipe);
+        isLoading = false;
         if (result.IsSuccessStatusCode)
         {
             NavigationManager.NavigateTo("recipes");
@@ -137,11 +187,35 @@
             await JSRuntime.InvokeVoidAsync("alert", "Error creating recipe");
         }
     }
-    private void CalculateWeight(Microsoft.AspNetCore.Components.ChangeEventArgs args)
+    void OnProductSelected(ChangeEventArgs<int, ProductListDto> args, RecipeLineCreateDto line)
+    {
+        line.Product = products.FirstOrDefault(p => p.Id == args.Value);
+        line.UnitId = line.Product?.ProductUnits.FirstOrDefault(u => u.IsPrimary)?.UnitId ?? 0;
+
+        if (!recipe.RecipeLines.Any(l => l.ProductId == 0))
+        {
+            recipe.RecipeLines.Add(new RecipeLineCreateDto());
+        }
+
+        CalculateWeight();
+    }
+
+    private void RemoveLine(object context)
+    {
+        var line = context as RecipeLineCreateDto;
+        recipe.RecipeLines.Remove(line);
+        CalculateWeight();
+         DefaultGrid!.Refresh();
+    }
+    private void CalculateWeight()
     {
         var lines = recipe.RecipeLines.ToList();
         lines.RemoveAll(rl => rl.ProductId == 0);
         weight = lines.Sum(rl => rl.Quantity * rl.Product.ProductUnits.Where(pu => pu.UnitId == rl.UnitId).Select(pu => pu.Weight).FirstOrDefault());
-       
+    }
+    private void UnitChanged(ChangeEventArgs<int, ProductUnitDto> args)
+    {
+        CalculateWeight();
+
     }
 }

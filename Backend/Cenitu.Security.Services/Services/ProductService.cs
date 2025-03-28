@@ -80,12 +80,8 @@ namespace Cenitu.Security.Services.Services
             {
                 throw new Exception("Product not found");
             }
-
-            if (product.PrimaryUnit!.Id != productUpdateDto.ProductUnits.FirstOrDefault(x => x.IsPrimary)!.UnitId)
-            {
-                var transactionLines = context.StockTransactionLines.Include(x => x.Product).ThenInclude(x => x.ProductUnits).Where(x => x.ProductId == product.Id).ToList();
-                product.StockQuantity /= product.ProductUnits!.FirstOrDefault(x => x.UnitId == productUpdateDto.ProductUnits.FirstOrDefault(x => x.IsPrimary)!.UnitId)!.ConversionFactor;
-            }
+            var productPrimaryUnitId = product.PrimaryUnit!.Id;
+        
 
             // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
             mapper.Map(productUpdateDto, product);
@@ -109,7 +105,15 @@ namespace Cenitu.Security.Services.Services
             {
                 throw new Exception("Product not updated");
             }
-
+            if (productPrimaryUnitId != productUpdateDto.ProductUnits.FirstOrDefault(x => x.IsPrimary)!.UnitId)
+            {
+                var transactionLines = context.StockTransactionLines.Include(x => x.Product).ThenInclude(x => x.ProductUnits).Where(x => x.ProductId == product.Id).ToList();
+                product.StockQuantity = transactionLines.Sum(stl =>
+                    stl.TransactionType == TransactionType.Output ? -stl.PrimaryUnitQuantity :
+                    stl.TransactionType == TransactionType.Input ? stl.PrimaryUnitQuantity : 0);
+                await context.SaveChangesAsync();
+            }
+            
             // Güncellenmiş haliyle geri dön    
             return mapper.Map<ProductUpdateDto>(product);
 

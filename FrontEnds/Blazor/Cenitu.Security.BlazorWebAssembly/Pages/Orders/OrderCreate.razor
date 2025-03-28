@@ -92,7 +92,7 @@
     {
         var newLine = new StockTransactionLineDto();
         newLine.TransactionType = TransactionType.Output;
-        order.StockTransaction.StockTransactions.Add(new StockTransactionLineDto());
+        order.StockTransaction.StockTransactions.Add(newLine);
     }
     private async Task Save(MouseEventArgs args)
     {
@@ -101,7 +101,7 @@
         outputLine.ProductId = order.ProductId;
         outputLine.TransactionUnitQuantity = order.Quantity;
         outputLine.UnitId = products.FirstOrDefault(p => p.Id == order.ProductId)?.ProductUnits.FirstOrDefault(pu => pu.IsPrimary)?.UnitId ?? 0;
-        order.StockTransaction.StockTransactions.Add(outputLine);
+        order.StockTransaction.StockTransactions.Insert(0,outputLine);
         var result = await HttpClient.PostAsJsonAsync("orders", order);
         if (result.IsSuccessStatusCode)
         {

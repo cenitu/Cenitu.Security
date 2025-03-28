@@ -20,10 +20,14 @@ namespace Cenitu.Security.Domain.Entities
         public TransactionType TransactionType { get; set; }
 
         public int StockTransactionId { get; set; }
+        public StockTransaction StockTransaction { get; set; }
+        public decimal? TransactionConversionFactor { get; set; }
         public decimal ConversionFactor
         {
             get
             {
+                if (TransactionConversionFactor.HasValue)
+                    return TransactionConversionFactor.Value;
                 return Product.ProductUnits!.FirstOrDefault(pu => pu.UnitId == UnitId)?.ConversionFactor ?? 1;
             }
         }
@@ -49,9 +53,28 @@ namespace Cenitu.Security.Domain.Entities
                 return TransactionUnitQuantity * ConversionFactor;
             }
         }
-        public StockTransaction StockTransaction { get; set; }
+        
 
+        /// <summary>
+        /// Verilen bir Primary Unit miktarına göre ConversionFactor hesaplar ve set eder.
+        /// </summary>
+        /// <param name="primaryQuantity">İşleme karşılık gelen ana birim miktarı</param>
+        public void SetTransactionConversionFactorFromPrimaryUnitQuantity(decimal primaryQuantity)
+        {
+            if (TransactionUnitQuantity == 0)
+                throw new InvalidOperationException("Transaction unit quantity cannot be zero.");
 
+            TransactionConversionFactor = primaryQuantity / TransactionUnitQuantity;
+        }
+
+        /// <summary>
+        /// Fluent tarzda kullanım için zincirleme yapı döner.
+        /// </summary>
+        public StockTransactionLine WithTransactionConversionFactorFromPrimary(decimal primaryQty)
+        {
+            SetTransactionConversionFactorFromPrimaryUnitQuantity(primaryQty);
+            return this;
+        }
 
     }
 

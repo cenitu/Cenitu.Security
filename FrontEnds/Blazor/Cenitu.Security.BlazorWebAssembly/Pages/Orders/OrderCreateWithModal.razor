@@ -1,0 +1,184 @@
+﻿@page "/order/createe"
+
+@inject IHttpClientFactory HttpClientFactory
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 class=\"text-center mt-4 text-primary\">Create New Order</h3>
+
+<div class="card shadow-lg p-4">
+    <div class="row">
+        <div class="col-md-6">
+            <SfTextBox @bind-Value=order.OrderNumber Placeholder="Enter Order Number" />
+        </div>
+        <div class="col-md-6">
+            <SfDatePicker @bind-Value=order.Date Placeholder="Enter Order Date" />
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div class="d-flex">
+                <SfTextBox CssClass="flex-grow-1" Placeholder="Select Product" @bind-Value="selectedProductText" @onkeydown="OnProductTextKeyDown" @ondblclick="OpenProductModal"/>
+                <button class="btn btn-outline-secondary ms-1" type="button" @onclick="OpenProductModal">...</button>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <SfNumericTextBox @bind-Value=order.Quantity Placeholder="Enter Quantity" />
+        </div>
+    </div>
+</div>
+
+<h3 class="text-center mt-4 text-primary">Materials</h3>
+
+<div class="card shadow-lg p-4">
+    <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="AddMaterial"> Add Material </SfButton>
+    @foreach (var trLine in order.StockTransaction.StockTransactions.Where(st => st.TransactionType == TransactionType.Output))
+    {
+        <div class="row">
+            <div class="col-md-5">
+                <SfDropDownList TValue="int" TItem="ProductListDto" @bind-Value="trLine.ProductId" DataSource="@products" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Select Product">
+                    <DropDownListFieldSettings Text="Description" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+            <div class="col-md-2">
+                <SfNumericTextBox @bind-Value=trLine.TransactionUnitQuantity FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Quantity" />
+            </div>
+            <div class="col-md-2">
+                @if (trLine.ProductId > 0)
+                {
+                    var product = products.FirstOrDefault(pr => pr.Id == trLine.ProductId)!;
+                    if (trLine.UnitId == 0)
+                    {
+                        trLine.UnitId = product.ProductUnits.Where(x => x.IsPrimary).FirstOrDefault()?.UnitId ?? 0;
+                    }
+
+                    <SfComboBox TValue="int" AllowFiltering="true" Autofill=true TItem="ProductUnitDto" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" @bind-Value="trLine.UnitId" DataSource="@product.ProductUnits" Placeholder="Select Unit">
+                        <ComboBoxFieldSettings Text="UnitSymbol" Value="UnitId"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                }
+                else
+                {
+                    <SfComboBox TValue="int" Enabled="false" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" TItem="ProductUnitDto"></SfComboBox>
+                }
+            </div>
+            <div class="col-md-3">
+                <SfNumericTextBox @bind-Value=trLine.Price FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Auto" Placeholder="Enter Cost" />
+            </div>
+        </div>
+    }
+
+</div>
+
+<div class="d-flex justify-content-center mt-4">
+    <SfButton CssClass="e-primary" @onclick="Save">Save</SfButton>
+</div>
+
+
+<!-- Modal -->
+@if (showProductModal)
+{
+    <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Product</h5>
+                    <button type="button" class="btn-close" @onclick="CloseProductModal"></button>
+                </div>
+                <div class="modal-body">
+                    <SfTextBox @bind-Value="productFilterText" Placeholder="Filter Products" ShowClearButton=true />
+                    <table class="table table-hover mt-2">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in FilteredProducts)
+                            {
+                                <tr @onclick="() => SelectProduct(product)" style="cursor:pointer;">
+                                    <td>@product.Code</td>
+                                    <td>@product.Description</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    private ProductionOrderCreateDto order = new();
+    private List<ProductListDto> products = new();
+
+    private bool showProductModal = false;
+    private string selectedProductText = "";
+    private string productFilterText = "";
+
+    private void OpenProductModal()
+    {
+        productFilterText = selectedProductText;
+        showProductModal = true;
+    }
+
+    private void CloseProductModal()
+    {
+        showProductModal = false;
+    }
+    private void OnProductTextKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            OpenProductModal();
+        }
+    }
+
+    private IEnumerable<ProductListDto> FilteredProducts =>
+       string.IsNullOrWhiteSpace(productFilterText)
+       ? products
+       : products.Where(p =>
+           p.Description.Contains(productFilterText, StringComparison.OrdinalIgnoreCase) ||
+           p.Code.Contains(productFilterText, StringComparison.OrdinalIgnoreCase));
+
+    private void SelectProduct(ProductListDto product)
+    {
+        order.ProductId = product.Id;
+        selectedProductText = product.Description;
+        CloseProductModal();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        HttpClient = HttpClientFactory.CreateClient("Auth");
+        products = (await HttpClient.GetFromJsonAsync<List<ProductListDto>>("products")) ?? [];
+    }
+    private void AddMaterial(MouseEventArgs args)
+    {
+        var newLine = new StockTransactionLineDto();
+        newLine.TransactionType = TransactionType.Output;
+        order.StockTransaction.StockTransactions.Add(newLine);
+    }
+    private async Task Save(MouseEventArgs args)
+    {
+        var outputLine = new StockTransactionLineDto();
+        outputLine.TransactionType = TransactionType.Input;
+        outputLine.ProductId = order.ProductId;
+        outputLine.TransactionUnitQuantity = order.Quantity;
+        outputLine.UnitId = products.FirstOrDefault(p => p.Id == order.ProductId)?.ProductUnits.FirstOrDefault(pu => pu.IsPrimary)?.UnitId ?? 0;
+        order.StockTransaction.StockTransactions.Insert(0, outputLine);
+        var result = await HttpClient.PostAsJsonAsync("orders", order);
+        if (result.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("orders");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Error creating order");
+        }
+
+    }
+
+}

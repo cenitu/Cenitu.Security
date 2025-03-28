@@ -28,20 +28,40 @@ namespace Cenitu.Security.Services.Services
         }
         public async Task AddOrderAsync(ProductionOrderCreateDto orderCreateDto)
         {
-            
+
             var order = mapper.Map<ProductionOrder>(orderCreateDto);
-            
+
             var transactionLines = order.StockTransaction.StockTransactions;
             order.StockTransaction.TransactionSource = TransactionSource.Production;
             order.StockTransaction.Date = order.Date;
 
-            var producrIds = transactionLines.Select(x => x.ProductId).ToList();
-            var products = await _appDbContext.Products.Where(x => producrIds.Contains(x.Id)).ToListAsync();
+            _appDbContext.Orders.Add(order);
+            await _appDbContext.SaveChangesAsync();
+            await UpdateOrderTransactionsAsync(order);
+
+        }
+
+        private async Task UpdateOrderTransactionsAsync(ProductionOrder order)
+        {
+            var orderToUpdate = await _appDbContext.Orders
+                                        .Include(or => or.StockTransaction)
+                                            .ThenInclude(st => st.StockTransactions)
+                                                .ThenInclude(sts => sts.Product)
+                                                    .ThenInclude(pr => pr.ProductUnits)
+                                        .FirstOrDefaultAsync(or => or.Id == order.Id);
+            var products = orderToUpdate!.StockTransaction.StockTransactions.Select(x => x.Product).ToList();
+            var transactionLines = orderToUpdate!.StockTransaction.StockTransactions.ToList();
+
             foreach (var item in products)
             {
-                item.StockQuantity += transactionLines.First(x => x.ProductId == item.Id).PrimaryUnitQuantity;
+                var transactionLine = transactionLines.First(x => x.ProductId == item.Id);
+                if (transactionLine.TransactionType == TransactionType.Input)
+                { item.StockQuantity += transactionLine.PrimaryUnitQuantity; }
+                else
+                {
+                    item.StockQuantity -= transactionLine.PrimaryUnitQuantity;
+                }
             }
-            _appDbContext.Orders.Add(order);
             await _appDbContext.SaveChangesAsync();
         }
         public async Task<ApiResponse<OrderListDto>> GetOrdersAsync(int skip, int? top, string? filter, string? orderby)

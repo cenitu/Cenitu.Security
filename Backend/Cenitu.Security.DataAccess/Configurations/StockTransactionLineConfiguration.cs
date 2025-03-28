@@ -19,6 +19,8 @@ namespace Cenitu.Security.DataAccess.Configurations
             builder.HasOne(s=>s.StockTransaction).WithMany(x=>x.StockTransactions).HasForeignKey(x=>x.StockTransactionId);
             builder.HasOne(s => s.Product).WithMany(x=>x.StockTransactionLines).HasForeignKey(x => x.ProductId);
             builder.HasOne(s=>s.Unit).WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.NoAction);
+            builder.Property(s => s.TransactionType).HasConversion<byte>();
+            builder.Property(s=>s.TransactionConversionFactor).HasPrecision(18, 4);
             builder.ToTable("StockTransactionLines");
         }
     }

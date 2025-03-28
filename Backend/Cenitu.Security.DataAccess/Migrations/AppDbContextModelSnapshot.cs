@@ -294,6 +294,12 @@ namespace Cenitu.Security.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsMainIgredientOrPackaging")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRawMaterialOrSemiFinished")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -392,8 +398,12 @@ namespace Cenitu.Security.DataAccess.Migrations
                     b.Property<int>("StockTransactionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("TransactionConversionFactor")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<byte>("TransactionType")
+                        .HasColumnType("tinyint");
 
                     b.Property<decimal>("TransactionUnitQuantity")
                         .HasPrecision(18, 4)
