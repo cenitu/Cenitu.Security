@@ -21,6 +21,7 @@ namespace Cenitu.Security.DataAccess
         public DbSet<StockTransactionLine> StockTransactionLines { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<RecipeLine> RecipeLines { get; set; }
+        
 
 
         protected override void OnModelCreating(ModelBuilder builder)

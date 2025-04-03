@@ -17,10 +17,10 @@
                 </div>
                 <div class="d-flex justify-content-end">
                     <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
-                        <span class="ml-2">Export to Excel</span>
+                        <span>Export to Excel</span>
                     </SfButton>
-                    <SfButton CssClass="e-danger e-icon-btn" IconCss="e-icons e-export-pdf" @onclick="ExportToPdf">
-                        <span class="ml-2">Export to Pdf</span>
+                    <SfButton CssClass="e-danger e-icon-btn ml-2" IconCss="e-icons e-export-pdf" @onclick="ExportToPdf">
+                        <span>Export to Pdf</span>
                     </SfButton>
                 </div>
             </div>
@@ -51,14 +51,14 @@
 
                 <GridColumns>
                     <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
-                    <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100"
-                                />
+                    <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100" />
                     <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
                     <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
-                    <GridColumn Field="@nameof(ProductListDto.StockQuantity)" HeaderText="In Stock" Width="100" Format="N2" TextAlign="TextAlign.Right"/>
+                    <GridColumn Field="@nameof(ProductListDto.StockQuantity)" HeaderText="In Stock" Width="100" Format="N2" TextAlign="TextAlign.Right" />
                     <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />
-                    <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100"/>
-                    <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100"/>
+                    <GridColumn Field="@nameof(ProductListDto.SellingPrice)" HeaderText="Unit Price" Width="100" Format="$ ##,0.00" TextAlign="TextAlign.Right" />
+                    <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100" />
+                    <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100" />
                     <GridColumn Field="@nameof(ProductListDto.LastModifiedByUserName)" HeaderText="Last Modified By" Width="100" />
                     <GridColumn Field="@nameof(ProductListDto.LastModifiedDate)" HeaderText="Last Modified Date" Width="100" />
                 </GridColumns>

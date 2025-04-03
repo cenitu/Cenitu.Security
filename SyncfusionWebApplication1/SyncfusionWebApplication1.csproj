@@ -9,5 +9,9 @@
   <ItemGroup>
          <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="29.1.33" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\MiddleWares\Cenitu.Security.Dtos\Cenitu.Security.Dtos.csproj" />
+  </ItemGroup>
 
 </Project>

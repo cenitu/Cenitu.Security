@@ -11,16 +11,16 @@ namespace Cenitu.Security.Domain.Entities
     {
         public int Id { get; set; }
         public int ProductId { get; set; }
-        public Product Product { get; set; }
+        public Product? Product { get; set; }
         public decimal TransactionUnitQuantity { get; set; }
         public decimal Price { get; set; }
         public int UnitId { get; set; }
-        public Unit Unit { get; set; }
+        public Unit? Unit { get; set; }
 
         public TransactionType TransactionType { get; set; }
 
         public int StockTransactionId { get; set; }
-        public StockTransaction StockTransaction { get; set; }
+        public StockTransaction? StockTransaction { get; set; }
         public decimal? TransactionConversionFactor { get; set; }
         public decimal ConversionFactor
         {
@@ -28,14 +28,14 @@ namespace Cenitu.Security.Domain.Entities
             {
                 if (TransactionConversionFactor.HasValue)
                     return TransactionConversionFactor.Value;
-                return Product.ProductUnits!.FirstOrDefault(pu => pu.UnitId == UnitId)?.ConversionFactor ?? 1;
+                return Product?.ProductUnits?.FirstOrDefault(pu => pu.UnitId == UnitId)?.ConversionFactor ?? 1;
             }
         }
         public string TransactionUnitSymbol
         {
             get
             {
-                return Unit.Symbol;
+                return Unit!.Symbol;
             }
         }
 
@@ -43,7 +43,7 @@ namespace Cenitu.Security.Domain.Entities
         {
             get
             {
-                return Product.PrimaryUnitSymbol!;
+                return Product?.PrimaryUnitSymbol!;
             }
         }
         public decimal PrimaryUnitQuantity

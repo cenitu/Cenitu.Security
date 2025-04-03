@@ -25,7 +25,12 @@ namespace Cenitu.Security.Services.Services
 
         public async Task<ProductUpdateDto> GetProductAsync(int Id)
         {
-            var product = await context.Products.Include(x => x.ProductUnits)!.ThenInclude(x => x.Unit).Where(x => x.Id == Id).FirstOrDefaultAsync();
+            var product = await context.Products
+                .Include(x => x.ProductUnits)!
+                .ThenInclude(x => x.Unit)
+                .Include(p=>p.ProductOptions)
+                .ThenInclude(x => x.OptionProduct)
+                .Where(x => x.Id == Id).FirstOrDefaultAsync();
             if (product == null)
             {
                 throw new Exception("Product not found");
@@ -75,7 +80,7 @@ namespace Cenitu.Security.Services.Services
         public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productUpdateDto)
         {
             //var user = await userManager.FindByEmailAsync(productUpdateDto.LastModifiedByUserName!);
-            var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
+            var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).Include(x=>x.ProductOptions).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
             if (product == null)
             {
                 throw new Exception("Product not found");
@@ -100,6 +105,11 @@ namespace Cenitu.Security.Services.Services
             product.LastModifiedDate = DateTime.Now;
             //context.Products.Update(productToUpdate);
             // Değişiklikleri kaydet
+            product.ProductOptions = productUpdateDto.ProductOptions.Select(po=> new ProductOption
+            {
+                ProductId = product.Id,
+                OptionProductId = po.OptionProductId,
+            }).ToList();
             var result = await context.SaveChangesAsync();
             if (result == 0)
             {
@@ -119,6 +129,8 @@ namespace Cenitu.Security.Services.Services
 
             //return productUpdateDto;
         }
+
+       
         public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
         {
             var query = context.Products

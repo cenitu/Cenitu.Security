@@ -7,11 +7,14 @@ namespace Cenitu.Security.Domain.Entities
         public int Id { get; set; }
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
+        public decimal SellingPrice { get; set; }
+        public bool CanBeAnOption { get; set; }
         public ProductType ProductType { get; set; }
         public ProductTrackingType TrackingType { get; set; }
         public ICollection<ProductionOrder>? Orders { get; set; } = [];
         public ICollection<ProductUnit>? ProductUnits { get; set; } = [];
         public ICollection<StockTransactionLine> StockTransactionLines { get; set; } = [];
+        public ICollection<ProductOption> ProductOptions { get; set; } = [];
         public Unit? PrimaryUnit
         {
             get

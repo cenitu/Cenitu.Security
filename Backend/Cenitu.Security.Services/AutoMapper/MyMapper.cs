@@ -34,6 +34,7 @@ namespace Cenitu.Security.Services.AutoMapper
             CreateMap<RecipeCreateDto, Recipe>().ReverseMap();
             CreateMap<RecipeLineCreateDto, RecipeLine>().ReverseMap();
 
+            CreateMap<ProductOption, ProductOptionDto>().ReverseMap();
         }
     }
 }

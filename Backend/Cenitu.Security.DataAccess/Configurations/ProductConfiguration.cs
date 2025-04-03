@@ -19,6 +19,9 @@ namespace Cenitu.Security.DataAccess.Configurations
             builder.Property(p => p.ProductType).HasConversion<byte>();
             builder.Property(p => p.TrackingType).HasConversion<byte>();
             builder.Property(p => p.StockQuantity).HasPrecision(19, 3);
+            builder.Property(p => p.SellingPrice).HasPrecision(18, 3);
+            
+
 
             //builder.Property(p=>p.PrimaryUnitSymbol).HasMaxLength(10);
             builder.ToTable("Products");

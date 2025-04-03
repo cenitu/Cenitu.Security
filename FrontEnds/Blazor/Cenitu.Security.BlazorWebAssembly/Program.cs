@@ -10,11 +10,9 @@ using Syncfusion.Blazor;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NMaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWX1feHRURWRcWE1/X0E=");
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-			builder.Services.AddSyncfusionBlazor();
 
-builder.Services.AddSyncfusionBlazor();
 // Register the locale service to localize the  SyncfusionBlazor components.
-builder.Services.AddSingleton(typeof(ISyncfusionStringLocalizer), typeof(SyncfusionLocalizer));
+builder.Services.AddSingleton<ISyncfusionStringLocalizer, SyncfusionLocalizer>();
 
 builder.Services.AddAuthorizationCore();
 

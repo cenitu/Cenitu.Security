@@ -12,14 +12,15 @@
 
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.2" />
-		<PackageReference Include="Syncfusion.Blazor.Grid" Version="28.2.5" />
-		<PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.5" />
-		<PackageReference Include="Syncfusion.Blazor.MultiColumnCombobox" Version="28.2.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.3" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="29.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" Version="29.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.MultiColumnCombobox" Version="29.1.35" />
+		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 	</ItemGroup>
 
 	<ItemGroup>
