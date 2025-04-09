@@ -26,7 +26,10 @@ namespace Cenitu.Security.Domain.Entities
         {
             get
             {
-                return Product.ProductUnits!.Where(x => x.UnitId == UnitId).FirstOrDefault()!.Weight;
+                var unit = Product.ProductUnits!.Where(x => x.UnitId == UnitId).FirstOrDefault();
+                if (unit == null)
+                    return 0;
+                return unit.Weight;
             }
         }
 

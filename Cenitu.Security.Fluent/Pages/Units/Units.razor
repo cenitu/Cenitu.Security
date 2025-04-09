@@ -1,0 +1,84 @@
+﻿@page "/units"
+@attribute [Authorize(Roles = "Admin, User")]
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+
+<div class="col-12 mt-4">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-primary text-center">Units</h3>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
+                <SfButton OnClick="@(async() =>await Grid!.ResetPersistDataAsync())">Reset State</SfButton>
+            </div>
+            <div class="d-flex justify-content-end">
+                <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
+                    <span>Export to Excel</span>
+                </SfButton>
+                <SfButton CssClass="e-danger e-icon-btn ml-2" IconCss="e-icons e-export-pdf" @onclick="ExportToPdf">
+                    <span>Export to Pdf</span>
+                </SfButton>
+            </div>
+        </div>
+        <SfGrid ID="UnitsGrid"
+                @ref="Grid"
+                TValue="UnitDto"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowResizing="true"
+                AllowReordering="true"
+                AllowExcelExport="true"
+                AllowPdfExport="true"
+                EnablePersistence="true"
+                ShowColumnChooser="true"
+                RowHeight="35"
+                Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
+                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
+
+            <SfDataManager HttpClientInstance="@httpClient" Url="/units" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+
+            <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="UnitDto"></GridEvents>
+            <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
+
+            <GridColumns>
+                <GridColumn Field="@nameof(UnitDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
+                <GridColumn Field="@nameof(UnitDto.Name)" HeaderText="Name" Width="150" />
+                <GridColumn Field="@nameof(UnitDto.Symbol)" HeaderText="Symbol" Width="100" />
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@code {
+    private SfGrid<UnitDto>? Grid;
+    private HttpClient? httpClient;
+
+    protected override void OnInitialized()
+    {
+        httpClient = HttpClientFactory.CreateClient("Auth");
+        base.OnInitialized();
+    }
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("unit/create");
+    }
+
+    private async Task ExportToExcel()
+    {
+        await Grid!.ExportToExcelAsync(new ExcelExportProperties { FileName = "Units.xlsx" });
+    }
+
+    private async Task ExportToPdf()
+    {
+        await Grid!.ExportToPdfAsync(new PdfExportProperties { FileName = "Units.pdf" });
+    }
+
+    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<UnitDto> args)
+    {
+        NavigationManager.NavigateTo($"unit/update/{args.RowData.Id}");
+    }
+}

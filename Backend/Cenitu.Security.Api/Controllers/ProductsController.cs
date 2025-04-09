@@ -21,7 +21,7 @@ namespace Cenitu.Security.Api.Controllers
         }
 
         [Authorize(Roles = "Admin, User")]
-        //[HttpGet("GetProducts")]
+      
         [HttpGet]
         public async Task<IActionResult> GetProductsAsync(
             [FromQuery(Name = "$inlinecount")] string? inlinecount,
@@ -37,27 +37,19 @@ namespace Cenitu.Security.Api.Controllers
             }
             return Ok(productList);
         }
-        //[Authorize(Roles = "Admin, User")]
-        //[HttpGet("GetProducts")]
-        //public async Task<IActionResult> GetProducts()
-        //{
-        //    var productList = await productService.GetProductsAsync();
-        //    return Ok(productList);
-        //}
+      
         [Authorize(Roles = "Admin")]
-        //[HttpPost("AddProduct")]
-        //[HttpPost("AddProduct")]
+    
         [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productCreateDto)
         {
-            //productCreateDto.CreatedByUserName = User.Identity!.Name;
-            //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
             productCreateDto.CreatedByUserName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var result = await _productService.AddProductAsync(productCreateDto);
             return Ok(result);
         }
 
-        //[HttpPut("UpdateProduct")]
+    
         [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateProductAsync([FromBody] ProductUpdateDto productUpdateDto)
@@ -67,7 +59,7 @@ namespace Cenitu.Security.Api.Controllers
             return Ok(result);
         }
         [Authorize(Roles = "Admin, User")]
-        //[HttpGet("GetProduct")]
+
         [HttpGet("{Id}")]
         public async Task<ProductUpdateDto> GetProduct(int Id)
         {

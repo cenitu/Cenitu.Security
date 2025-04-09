@@ -1,0 +1,180 @@
+﻿using Blazored.LocalStorage;
+using Cenitu.Security.Dtos;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.ComponentModel.Design;
+using System.IO.Pipes;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
+
+namespace Cenitu.Security.Fluent.Services
+{
+    public class CustomTokenAuthenticationStateProvider : AuthenticationStateProvider, IAccountManagement
+    {
+        private bool _authinticated = false;
+        private readonly ClaimsPrincipal Unauthenticated = new(new ClaimsIdentity());
+        private readonly HttpClient httpClient;
+        private readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private readonly ILocalStorageService localStorage;
+
+        public CustomTokenAuthenticationStateProvider(IHttpClientFactory httpClientFactory, ILocalStorageService localStorage)
+        {
+            httpClient = httpClientFactory.CreateClient("Auth");
+            this.localStorage = localStorage;
+        }
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            _authinticated = false;
+            var user = Unauthenticated;
+            try
+            {
+                var userResponse = await httpClient.GetAsync("manage/info");
+
+                userResponse.EnsureSuccessStatusCode();
+                var userJson = await userResponse.Content.ReadAsStringAsync();
+                var userInfo = JsonSerializer.Deserialize<UserInfo>(userJson, jsonOptions);
+                if (userInfo != null)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, userInfo.Email),
+                        new Claim(ClaimTypes.Email, userInfo.Email),
+
+                    };
+                    claims.AddRange(userInfo.Claims.Where(c => c.Key != ClaimTypes.Name && c.Key != ClaimTypes.Email).Select(c => new Claim(c.Key, c.Value)));
+                    var rolesResponse = await httpClient.GetAsync($"/Role/GetUserRole?emailId={userInfo.Email}");
+                    rolesResponse.EnsureSuccessStatusCode();
+                    var rolesJson = await rolesResponse.Content.ReadAsStringAsync();
+                    var roles = JsonSerializer.Deserialize<string[]>(rolesJson, jsonOptions);
+                    if (roles != null && roles.Length > 0)
+                    {
+                        foreach (var role in roles)
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role));
+                        }
+                    }
+                    var id = new ClaimsIdentity(claims, nameof(CustomTokenAuthenticationStateProvider));
+                    user = new ClaimsPrincipal(id);
+                    _authinticated = true;
+
+                }
+            }
+            catch (Exception)
+            {
+
+                var refreshToken = await localStorage.GetItemAsync<string>("refreshToken");
+                if (refreshToken is not null)
+                {
+                    
+                    var response = await httpClient.PostAsJsonAsync("refresh", new { RefreshToken = refreshToken });
+                    response.EnsureSuccessStatusCode();
+                    var tokenResponse = await response.Content.ReadAsStringAsync();
+                    var tokenInfo = JsonSerializer.Deserialize<TokenInfo>(tokenResponse, jsonOptions)!;
+                    await localStorage.SetItemAsync("accessToken", tokenInfo.AccessToken);
+                    await localStorage.SetItemAsync("refreshToken", tokenInfo.RefreshToken);
+                    _authinticated = true;
+
+                }
+                else
+                {
+                    await localStorage.RemoveItemAsync("accessToken");
+                    await localStorage.RemoveItemAsync("refreshToken");
+                    _authinticated = false;
+                }
+            }
+           
+            return new AuthenticationState(user);
+        }
+
+        public async Task<FormResult> RegisterAsync(string email, string password)
+        {
+            string[] defaultDetail = ["An unknown error prevented registration from succeeding."];
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("register", new { Email = email, Password = password });
+                if (response.IsSuccessStatusCode)
+                {
+                    return new FormResult { Succeeded = true };
+                }
+                var details = await response.Content.ReadAsStringAsync();
+                var problemDetails = JsonDocument.Parse(details);
+                var errors = new List<string>();
+                var errorList = problemDetails.RootElement.GetProperty("errors");
+                foreach (var error in errorList.EnumerateObject())
+                {
+                    if (errorList.ValueKind == JsonValueKind.String)
+                    {
+                        errors.Add(error.Value.GetString()!);
+                    }
+                    else if (errorList.ValueKind == JsonValueKind.Array)
+                    {
+                        errors.AddRange(error.Value.EnumerateArray().Select(e => e.GetString() ?? string.Empty).Where(e => !string.IsNullOrEmpty(e)));
+                    }
+
+
+                }
+                return new FormResult { Succeeded = false, ErrorList = problemDetails == null ? defaultDetail : [.. errors] };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<FormResult> LoginAsync(string email, string password)
+        {
+
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/login", new
+                {
+                    Email = email,
+                    Password = password
+                });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var tokenResponse = await response.Content.ReadAsStringAsync();
+                    var tokenInfo = JsonSerializer.Deserialize<TokenInfo>(tokenResponse, jsonOptions)!;
+                    await localStorage.SetItemAsync("accessToken", tokenInfo.AccessToken);
+                    await localStorage.SetItemAsync("refreshToken", tokenInfo.RefreshToken);
+                    NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+                    return new FormResult { Succeeded = true };
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return new FormResult { Succeeded = false, ErrorList = ["Invalid email and/or password."] };
+
+        }
+
+        public async Task LogoutAsync()
+        {
+
+            const string empty = "{}";
+            var emptyContent = new StringContent(empty, Encoding.UTF8, "application/json");
+
+            var result = await httpClient.PostAsync("user/logout", emptyContent);
+            if (result.IsSuccessStatusCode)
+            {
+                await localStorage.RemoveItemAsync("accessToken");
+                await localStorage.RemoveItemAsync("refreshToken");
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            }
+        }
+
+        public async Task<bool> CheckAuthenticatedAsync()
+        {
+            await GetAuthenticationStateAsync();
+            return _authinticated;
+        }
+    }
+}

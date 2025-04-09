@@ -5,10 +5,7 @@ using Cenitu.Security.Dtos;
 using Cenitu.Security.Dtos.Enums;
 using Cenitu.Security.Dtos.Product;
 using Cenitu.Security.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Cenitu.Security.Services.Services
 {
@@ -28,7 +25,7 @@ namespace Cenitu.Security.Services.Services
             var product = await context.Products
                 .Include(x => x.ProductUnits)!
                 .ThenInclude(x => x.Unit)
-                .Include(p=>p.ProductOptions)
+                .Include(p => p.ProductOptions)
                 .ThenInclude(x => x.OptionProduct)
                 .Where(x => x.Id == Id).FirstOrDefaultAsync();
             if (product == null)
@@ -64,6 +61,10 @@ namespace Cenitu.Security.Services.Services
             //        ConversionFactor = productUnit.ConversionFactor,
             //    });
             //}
+            product.ProductOptions = [.. productCreateDto.ProductOptions.Select(po => new ProductOption
+            {
+                OptionProductId = po.OptionProductId,
+            })];
             context.Products.Add(product);
 
             var result = await context.SaveChangesAsync();
@@ -80,13 +81,13 @@ namespace Cenitu.Security.Services.Services
         public async Task<ProductUpdateDto> UpdateProductAsync(ProductUpdateDto productUpdateDto)
         {
             //var user = await userManager.FindByEmailAsync(productUpdateDto.LastModifiedByUserName!);
-            var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).Include(x=>x.ProductOptions).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
+            var product = await context.Products.Include(x => x.ProductUnits!).ThenInclude(x => x.Unit).Include(x => x.ProductOptions).FirstOrDefaultAsync(x => x.Id == productUpdateDto.Id);
             if (product == null)
             {
                 throw new Exception("Product not found");
             }
             var productPrimaryUnitId = product.PrimaryUnit!.Id;
-        
+
 
             // Güncellenmesi gereken alanları doğrudan var olan nesneye uygula
             mapper.Map(productUpdateDto, product);
@@ -105,7 +106,7 @@ namespace Cenitu.Security.Services.Services
             product.LastModifiedDate = DateTime.Now;
             //context.Products.Update(productToUpdate);
             // Değişiklikleri kaydet
-            product.ProductOptions = productUpdateDto.ProductOptions.Select(po=> new ProductOption
+            product.ProductOptions = productUpdateDto.ProductOptions.Select(po => new ProductOption
             {
                 ProductId = product.Id,
                 OptionProductId = po.OptionProductId,
@@ -123,14 +124,14 @@ namespace Cenitu.Security.Services.Services
                     stl.TransactionType == TransactionType.Input ? stl.PrimaryUnitQuantity : 0);
                 await context.SaveChangesAsync();
             }
-            
+
             // Güncellenmiş haliyle geri dön    
             return mapper.Map<ProductUpdateDto>(product);
 
             //return productUpdateDto;
         }
 
-       
+
         public async Task<ApiResponse<ProductListDto>> GetProductsAsync(int skip, int? top, string? filter, string? orderby)
         {
             var query = context.Products
@@ -142,7 +143,7 @@ namespace Cenitu.Security.Services.Services
 
             if (!string.IsNullOrEmpty(filter))
             {
-                filter = OrderServiceHelpers.RefineFilter(filter);
+                filter = CenituServiceHelpers.RefineFilter(filter);
                 query = query.Where(x => x.Code.Contains(filter) ||
                                          x.Description.Contains(filter) ||
                                          x.ProductUnits!.Any(pu => pu.IsPrimary && pu.Unit.Symbol.Contains(filter)));
@@ -177,24 +178,11 @@ namespace Cenitu.Security.Services.Services
             }
 
             var products = await query.ToListAsync();
-            var productIds = products.Select(p => p.Id).ToHashSet();
 
-            //var stockTransactionLines = await context.StockTransactionLines
-            //    .Where(st => productIds.Contains(st.ProductId))
-            //    .ToListAsync();
-
-            //var stockData = stockTransactionLines
-            //    .GroupBy(st => st.ProductId)
-            //    .ToDictionary(g => g.Key, g => g.Sum(stl =>
-            //        stl.TransactionType == TransactionType.Input ? -stl.Quantity :
-            //        stl.TransactionType == TransactionType.Output ? stl.Quantity : 0));
-
+      
             var productListDto = mapper.Map<List<ProductListDto>>(products);
 
-            //foreach (var product in productListDto)
-            //{
-            //    product.StockQuantity = stockData.TryGetValue(product.Id, out var quantity) ? quantity : 0;
-            //}
+           
 
             return new ApiResponse<ProductListDto>
             {
@@ -206,7 +194,7 @@ namespace Cenitu.Security.Services.Services
         {
             var products = context.Products
                 .Include(x => x.StockTransactionLines)
-                .Include(x=>x.ProductUnits)!.ThenInclude(x=>x.Unit);
+                .Include(x => x.ProductUnits)!.ThenInclude(x => x.Unit);
             foreach (var product in products)
             {
                 product.StockQuantity = product.StockTransactionLines.Sum(stl =>

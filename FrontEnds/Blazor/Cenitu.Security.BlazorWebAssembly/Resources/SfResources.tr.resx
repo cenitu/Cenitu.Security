@@ -687,6 +687,9 @@
   <data name="DocumentEditor_Ok" xml:space="preserve">
     <value>Tamam</value>
   </data>
+  <data name="DocumentEditor_Apply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
   <data name="DocumentEditor_Cancel" xml:space="preserve">
     <value>İptal et</value>
   </data>
@@ -6548,6 +6551,9 @@
   </data>
   <data name="DocumentEditor_BarTab" xml:space="preserve">
     <value>Çubuk Sekmesi</value>
+  </data>
+  <data name="DataForm_SubmitContent" xml:space="preserve">
+    <value>Gönder</value>
   </data>
   <data name="PivotView_Combined" xml:space="preserve">
     <value>kombine</value>

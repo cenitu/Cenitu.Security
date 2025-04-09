@@ -96,6 +96,7 @@ builder.Services.AddCors(opts =>
     opts.AddPolicy("wasm", policy =>
     {
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:7292").AllowCredentials();
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:7195").AllowCredentials();
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:65515").AllowCredentials();
     });
 });

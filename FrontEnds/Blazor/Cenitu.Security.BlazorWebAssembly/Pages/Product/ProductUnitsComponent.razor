@@ -1,0 +1,181 @@
+﻿@using Cenitu.Security.Dtos.Product
+@using Cenitu.Security.Dtos.Unit
+@inject IHttpClientFactory HttpClientFactory
+
+<h4 class="text-center text-secondary">Product Units</h4>
+
+<div class="input-group mb-3">
+    <select class="form-select" @bind="selectedUnitId">
+        <option value="">-- Select Unit --</option>
+        @foreach (var unit in availableUnits)
+        {
+            <option value="@unit.Id">@unit.Symbol</option>
+        }
+    </select>
+    <button type="button" class="btn btn-success" @onclick="AddUnit">➕ Add Unit</button>
+</div>
+
+@if (localUnits.Any())
+{
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-secondary">
+            <tr>
+                <th>Primary</th>
+                <th>Unit</th>
+                <th>Conversion Factor</th>
+                <th>Weight (kg)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var unit in localUnits)
+            {
+                <tr>
+                    <td class="text-center">
+                        <SfRadioButton Name="primaryUnit"
+                                       Value="@unit.UnitSymbol"
+                                       @bind-Checked="SelectedPrimaryUnit"
+                                       @onclick="@(() => SetPrimaryUnit(unit))" />
+                    </td>
+                    <td>@unit.UnitSymbol</td>
+                    <td style="width: 200;">
+                        <div class="position-relative">
+                            <SfNumericTextBox TValue="decimal"
+                                              @bind-Value="unit.ConversionFactor"
+                                              Placeholder="Factor" Format="N3"
+                                              CssClass="numeric-with-suffix small-numeric" />
+                            <span class="unit-suffix">@SelectedPrimaryUnit</span>
+                        </div>
+                    </td>
+                    <td style="width: 200;">
+                        <div class="position-relative">
+                            <SfNumericTextBox TValue="decimal"
+                                              @bind-Value="unit.Weight"
+                                              Placeholder="Weight" Format="N3"
+                                              CssClass="numeric-with-suffix small-numeric" />
+                            <span class="unit-suffix">kg</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                @onclick="@(() => RemoveUnit(unit))">
+                            ❌ Remove
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info text-center">No units added.</div>
+}
+<style>
+    .numeric-with-suffix {
+        padding-right: 2rem;
+        text-align: right;
+    }
+
+    .small-numeric {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .unit-suffix {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: bold;
+        color: #6c757d;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+</style>
+@code {
+    [Parameter] public List<ProductUnitDto> Units { get; set; } = new();
+
+    private List<ProductUnitDto> localUnits = new();
+    private List<UnitDto> availableUnits = new();
+    private List<UnitDto> allUnits = new();
+    private int? selectedUnitId;
+    private string? SelectedPrimaryUnit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        localUnits = Units.Select(u => new ProductUnitDto
+            {
+                UnitId = u.UnitId,
+                UnitSymbol = u.UnitSymbol,
+                ConversionFactor = u.ConversionFactor,
+                Weight = u.Weight,
+                IsPrimary = u.IsPrimary
+            }).ToList();
+
+        var client = HttpClientFactory.CreateClient("Auth");
+        allUnits = await client.GetFromJsonAsync<List<UnitDto>>("units") ?? [];
+
+        availableUnits = allUnits
+            .Where(u => !localUnits.Any(pu => pu.UnitId == u.Id))
+            .ToList();
+
+        SelectedPrimaryUnit = localUnits.FirstOrDefault(u => u.IsPrimary)?.UnitSymbol;
+    }
+
+    void AddUnit()
+    {
+        if (selectedUnitId is null) return;
+
+        var unit = availableUnits.FirstOrDefault(u => u.Id == selectedUnitId);
+        if (unit is null) return;
+
+        bool isFirstUnit = !localUnits.Any();
+
+        localUnits.Add(new ProductUnitDto
+            {
+                UnitId = unit.Id,
+                UnitSymbol = unit.Symbol,
+                ConversionFactor = 1.0m,
+                Weight = 0.0m,
+                IsPrimary = isFirstUnit
+            });
+
+        if (isFirstUnit)
+        {
+            SelectedPrimaryUnit = unit.Symbol;  // Bunu ekle!
+        }
+
+        availableUnits.Remove(unit);
+        selectedUnitId = null;
+    }
+
+
+    void RemoveUnit(ProductUnitDto unit)
+    {
+        localUnits.Remove(unit);
+        availableUnits.Add(allUnits.First(u => u.Id == unit.UnitId));
+
+        if (unit.IsPrimary && localUnits.Any())
+            localUnits[0].IsPrimary = true;
+    }
+
+
+
+    void SetPrimaryUnit(ProductUnitDto selectedUnit)
+    {
+        var cf = selectedUnit.ConversionFactor;
+        foreach (var unit in localUnits)
+        {
+            unit.IsPrimary = false;
+            unit.ConversionFactor /= cf;
+        }
+
+        selectedUnit.IsPrimary = true;
+        selectedUnit.ConversionFactor = 1;
+        SelectedPrimaryUnit = selectedUnit.UnitSymbol;
+    }
+
+    public List<ProductUnitDto> GetUnits() => localUnits;
+}

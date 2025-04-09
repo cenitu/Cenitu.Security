@@ -1,0 +1,152 @@
+﻿@page "/orders"
+@using Cenitu.Security.Dtos.Order
+@attribute [Authorize(Roles = "Admin, User")]
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+
+<AuthorizeView>
+    <div class="col-12 mt-4">
+        <div class="card shadow-lg p-4">
+            <h3 class="text-primary text-center">Orders</h3>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
+                    @* <SfButton CssClass="e-warning" IconCss="e-icons e-edit" @onclick="Update"> Update </SfButton> *@
+                    <SfButton OnClick="@(async() =>await DefaultGrid!.ResetPersistDataAsync())">Reset State</SfButton>
+
+                </div>
+                <div class="d-flex justify-content-end">
+                    <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
+                        <span class="ml-2">Export to Excel</span>
+                    </SfButton>
+                    <SfButton CssClass="e-danger e-icon-btn" IconCss="e-icons e-export-pdf" @onclick="ExportToPdf">
+                        <span class="ml-2">Export to Pdf</span>
+                    </SfButton>
+                </div>
+            </div>
+
+
+
+            <SfGrid ID="OrdersGrid"
+                    @ref="DefaultGrid"
+                    TValue="OrderListDto"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    AllowResizing="true"
+                    AllowReordering="true"
+                    AllowExcelExport="true"
+                    AllowPdfExport="true"
+                    EnableStickyHeader="true"
+                    EnablePersistence="true"
+                    ShowColumnChooser="true"
+                    RowHeight="35"
+                    Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending","Copy", "ExcelExport", "CsvExport"})">
+
+                
+                <SfDataManager HttpClientInstance="@httpClient" Url="/orders" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+                <GridPageSettings PageSize="10"></GridPageSettings>
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(OrderListDto.Id)" HeaderText="ID" Width="50" Visible="false"/>
+                    <GridColumn Field="@nameof(OrderListDto.StockTransactionStatus)" HeaderText="Status" Width="50"/>
+                    <GridColumn Field="@nameof(OrderListDto.OrderNumber)" HeaderText="Order Number"  Width="50" />
+                    <GridColumn Field="@nameof(OrderListDto.Date)" HeaderText="Date" Width="50" Format="dd.MM.yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Left"   />
+                    <GridColumn Field="@nameof(OrderListDto.ProductCode)"  HeaderText="Product Code" Width="100" />
+                    <GridColumn Field="@nameof(OrderListDto.ProductDescription)" HeaderText="Description" Width="150" />
+                    <GridColumn Field="@nameof(OrderListDto.Quantity)" HeaderText="Quantity" Width="100" TextAlign="TextAlign.Right" />
+                    <GridColumn Field="@nameof(OrderListDto.MaterialCost)" HeaderText="MaterialCost" Format="C2" Width="100" TextAlign="TextAlign.Right" />
+        @* <GridColumn HeaderText="Product" Width="250">
+            <Template>
+                @{
+                    var data = context as OrderListDto;
+                    @data?.Product?.Description
+                }
+            </Template> 
+                    </GridColumn>*@
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+    </div>
+</AuthorizeView>
+
+<style>
+    .e-grid .e-headercelldiv {
+        font-size: 15px;
+        font-weight: bold;
+        color: #3c3c3c;
+    }
+
+    .e-grid .e-rowcell {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #f8f9fa;
+    }
+
+    .e-button {
+        font-size: 14px;
+    }
+
+    .e-icon-btn {
+        padding: 6px 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .ml-2 {
+        margin-left: 8px;
+    }
+</style>
+
+@code {
+    SfGrid<OrderListDto>? DefaultGrid;
+    private HttpClient? httpClient;
+    // private List<ProductListDto> ProductList = new();
+    private int? SelectedProductId;
+
+    protected override void OnInitialized()
+    {
+        httpClient = HttpClientFactory.CreateClient("Auth");
+        base.OnInitialized();
+    }
+
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("order/create");
+    }
+
+    private void Update()
+    {
+        var selectedProduct = DefaultGrid?.SelectedRecords.FirstOrDefault();
+        if (selectedProduct != null)
+        {
+            NavigationManager.NavigateTo($"order/update/{selectedProduct.Id}");
+        }
+        else
+        {
+            JSRuntime.InvokeVoidAsync("alert", "Please select a product to update.");
+        }
+    }
+    private async Task ExportToExcel()
+    {
+        
+        await DefaultGrid!.ExportToExcelAsync();
+    }
+
+    private async Task ExportToPdf()
+    {
+        await DefaultGrid!.ExportToPdfAsync();
+    }
+
+
+}
+

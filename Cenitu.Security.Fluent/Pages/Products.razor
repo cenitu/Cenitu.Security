@@ -1,0 +1,56 @@
+﻿@page "/productss"
+@using Cenitu.Security.Dtos
+@using Cenitu.Security.Dtos.Product
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+<h3>Product</h3>
+<FluentDataGrid @ref="productGrid"
+Items="productListItems"
+RefreshItems="RefreshItemsAsync"
+RowSize="DataGridRowSize.Small"
+GenerateHeader="GenerateHeaderOption.Sticky"
+TGridItem="ProductListDto"
+Pagination="@pagination">
+    <PropertyColumn Title="ID" Property="@(c => c!.Id)" />
+    <PropertyColumn Property="@(c => c!.Code)" Style="color: #af5f00 ;" Sortable="true"/>
+    <PropertyColumn Property="@(c => c!.Description)" />
+    <PropertyColumn Title="Birim" Property="@(c => c!.PrimaryUnitSymbol)" Tooltip="true" />
+    <PropertyColumn Property="@(c => c!.StockQuantity)" />
+</FluentDataGrid>
+<FluentPaginator State="@pagination" />
+@* @products.Count *@
+@code {
+    private HttpClient Http => HttpClientFactory.CreateClient("Auth");
+    // private List<ProductListDto> products = [];
+    private FluentDataGrid<ProductListDto> productGrid = default!;
+    IQueryable<ProductListDto> productListItems = default!;
+    bool loading = true;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    string baseUrl = "products";
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     products = await Http.GetFromJsonAsync<List<ProductListDto>>("products") ?? new();
+    // }
+
+    protected async Task RefreshItemsAsync(GridItemsProviderRequest<ProductListDto> req)
+    {
+        loading = true;
+        await InvokeAsync(StateHasChanged);
+        var filters = new Dictionary<string, object?>
+        {
+            {"$top", req.Count},
+            {"$skip", req.StartIndex}
+        };
+
+        string url = baseUrl + "?$inlinecount=allpages";
+        foreach (var item in filters)
+        {
+            url += $"&{item.Key}={item.Value}";
+        }
+        var response = await Http.GetFromJsonAsync<ApiResponse<ProductListDto>>(url);
+        productListItems = response!.Items.AsQueryable();
+        await pagination.SetTotalItemCountAsync(response.Count);
+        await InvokeAsync(StateHasChanged);
+
+    }
+}

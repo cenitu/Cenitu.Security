@@ -6,9 +6,11 @@
 
     <main>
 
+
+
         <div class="top-row px-4">
-            <button class="navbar-toggler" @onclick="ToggleNavMenu">
-                <span class="navbar-toggler-icon" ></span>
+            <button class="btn btn-primary" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon">@hideText</span>
             </button>
             <AuthorizeView>
                 <Authorized>
@@ -22,6 +24,8 @@
             </AuthorizeView>
         </div>
 
+
+
         <article class="content px-4">
             @Body
         </article>
@@ -29,10 +33,17 @@
 </div>
 @code {
     private bool isHidden;
+    private string hideText = "<";
     private void ToggleNavMenu(MouseEventArgs args)
     {
-        Console.WriteLine("ToggleNavMenu");
         isHidden = !isHidden;
-
+        if (isHidden)
+        {
+            hideText = ">";
+        }
+        else
+        {
+            hideText = "<";
+        }
     }
 }

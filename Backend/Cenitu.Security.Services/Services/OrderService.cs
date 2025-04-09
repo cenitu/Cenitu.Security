@@ -69,7 +69,7 @@ namespace Cenitu.Security.Services.Services
             var query = _appDbContext.Orders.Include(x => x.Product).Include(x => x.StockTransaction.StockTransactions).ThenInclude(x => x.Product).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
-                filter = OrderServiceHelpers.RefineFilter(filter);
+                filter = CenituServiceHelpers.RefineFilter(filter);
                 query = query.Where(x => x.OrderNumber.Contains(filter) || x.Product.Code.Contains(filter) || x.Product.Description.Contains(filter));
             }
             if (!string.IsNullOrEmpty(orderby))

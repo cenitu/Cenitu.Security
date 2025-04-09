@@ -1,0 +1,164 @@
+﻿@page "/products"
+
+@attribute [Authorize(Roles = "Admin, User")]
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+<AuthorizeView>
+
+        <FluentGrid AdaptiveRendering=true Justify="JustifyContent.SpaceEvenly" Style=" padding: 4px;margin-top:4px;">
+        <FluentGridItem xs="12" Justify="JustifyContent.Center"  >
+
+            <h3 class="text-primary text-center">Products</h3>
+
+        </FluentGridItem>
+            <FluentGridItem xs="6">
+              
+                    <FluentButton IconStart="@(new Icons.Regular.Size20.Add().WithColor(Color.Success))" OnClick="Add" BackgroundColor="var(--success-bg)" Color="var(--success)">Add Product</FluentButton>
+                    
+                    <FluentButton IconStart="@(new Icons.Regular.Size20.ArrowReset().WithColor(Color.Info))" OnClick="@(async() =>await DefaultGrid!.ResetPersistDataAsync())" BackgroundColor="var(--info-bg)" Color="var(--info)">Reset Grid</FluentButton>
+                
+            </FluentGridItem>
+            <FluentGridItem xs="6" Justify="JustifyContent.FlexEnd">
+
+           
+                   
+                    <FluentButton IconStart="@(new Icons.Regular.Size20.DocumentTable().WithColor(Color.Success))" OnClick="ExportToExcel" BackgroundColor="var(--success-bg)" Color="var(--success)">Export to Excel</FluentButton>
+                    <FluentButton IconStart="@(new Icons.Regular.Size20.DocumentPdf().WithColor(Color.Warning))" OnClick="ExportToPdf" BackgroundColor="var(--warning-bg)" Color="var(--warning)">Export to PDF</FluentButton>
+          
+            </FluentGridItem>
+            <FluentGridItem xs="12">
+                <div class="card">
+                    <SfGrid ID="ProductsGrid"
+                            @ref="DefaultGrid"
+                            TValue="ProductListDto"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            AllowFiltering="true"
+                            AllowResizing="true"
+                            AllowReordering="true"
+                            AllowExcelExport="true"
+                            AllowPdfExport="true"
+                            EnablePersistence="true"
+                            ShowColumnChooser="true"
+                            RowHeight="35"
+                            Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
+                            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
+
+
+                        <SfDataManager HttpClientInstance="@httpClient" Url="/products" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+
+
+                        <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="false" Mode="EditMode.Normal"></GridEditSettings>
+                        <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="ProductListDto"></GridEvents>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+                        <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
+
+                        <GridColumns>
+                            <GridColumn Field="@nameof(ProductListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
+                            <GridColumn Field="@nameof(ProductListDto.ProductType)" HeaderText="Product Type" Width="100" />
+                            <GridColumn Field="@nameof(ProductListDto.Code)" HeaderText="Code" Width="80" />
+                            <GridColumn Field="@nameof(ProductListDto.Description)" HeaderText="Description" Width="200" />
+                            <GridColumn Field="@nameof(ProductListDto.StockQuantity)" HeaderText="In Stock" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(ProductListDto.PrimaryUnitSymbol)" HeaderText="Unit" Width="50" />
+                            <GridColumn Field="@nameof(ProductListDto.SellingPrice)" HeaderText="Unit Price" Width="100" Format="$ ##,0.00" TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(ProductListDto.CreatedByUserName)" HeaderText="Created By" Width="100" />
+                            <GridColumn Field="@nameof(ProductListDto.CreatedDate)" HeaderText="Crated Date" Width="100" />
+                            <GridColumn Field="@nameof(ProductListDto.LastModifiedByUserName)" HeaderText="Last Modified By" Width="100" />
+                            <GridColumn Field="@nameof(ProductListDto.LastModifiedDate)" HeaderText="Last Modified Date" Width="100" />
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </FluentGridItem>
+        </FluentGrid>
+
+
+   
+</AuthorizeView>
+
+<style>
+    .e-grid .e-headercelldiv {
+        font-size: 15px;
+        font-weight: bold;
+        color: #3c3c3c;
+    }
+
+    .e-grid .e-rowcell {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #f8f9fa;
+    }
+
+    .e-button {
+        font-size: 14px;
+    }
+
+    .e-icon-btn {
+        padding: 6px 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .ml-2 {
+        margin-left: 8px;
+    }
+</style>
+
+@code {
+    SfGrid<ProductListDto>? DefaultGrid;
+    private HttpClient? httpClient;
+    // private List<ProductListDto> ProductList = new();
+    private int? SelectedProductId;
+
+    protected override void OnInitialized()
+    {
+        httpClient = HttpClientFactory.CreateClient("Auth");
+        base.OnInitialized();
+    }
+
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("product/create");
+    }
+
+    private void Update()
+    {
+        var selectedProduct = DefaultGrid?.SelectedRecords.FirstOrDefault();
+        if (selectedProduct != null)
+        {
+            NavigationManager.NavigateTo($"product/update/{selectedProduct.Id}");
+        }
+        else
+        {
+            JSRuntime.InvokeVoidAsync("alert", "Please select a product to update.");
+        }
+    }
+
+
+
+    private async Task ExportToExcel()
+    {
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.FileName = "Products.xlsx";
+        await DefaultGrid!.ExportToExcelAsync(ExcelProperties);
+
+    }
+
+    private async Task ExportToPdf()
+    {
+        PdfExportProperties PdfProperties = new PdfExportProperties();
+        PdfProperties.FileName = "Products.pdf";
+        await DefaultGrid!.ExportToPdfAsync(PdfProperties);
+
+
+    }
+
+    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<ProductListDto> args)
+    {
+        NavigationManager.NavigateTo($"product/update/{args.RowData.Id}");
+    }
+}

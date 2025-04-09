@@ -1,0 +1,145 @@
+﻿@page "/recipes"
+
+@attribute [Authorize(Roles = "Admin, User")]
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+<AuthorizeView>
+    <div class="col-12 mt-4">
+        <div class="card shadow-lg p-4">
+            <h3 class="text-primary text-center">Recipes</h3>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <SfButton CssClass="e-success" IconCss="e-icons e-plus" @onclick="Add"> Add </SfButton>
+                    @* <SfButton CssClass="e-warning" IconCss="e-icons e-edit" @onclick="Update"> Update </SfButton> *@
+                    <SfButton OnClick="@(async() =>await DefaultGrid!.ResetPersistDataAsync())">Reset State</SfButton>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <SfButton CssClass="e-primary e-icon-btn" IconCss="e-icons e-export-excel" @onclick="ExportToExcel">
+                        <span class="ml-2">Export to Excel</span>
+                    </SfButton>
+                    <SfButton CssClass="e-danger e-icon-btn" IconCss="e-icons e-export-pdf" @onclick="ExportToPdf">
+                        <span class="ml-2">Export to Pdf</span>
+                    </SfButton>
+                </div>
+            </div>
+            <SfGrid ID="RecipeGrid"
+                    @ref="DefaultGrid"
+                    TValue="RecipeListDto"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    AllowResizing="true"
+                    AllowReordering="true"
+                    AllowExcelExport="true"
+                    AllowPdfExport="true"
+                    EnablePersistence="true"
+                    ShowColumnChooser="true"
+                    RowHeight="35"
+                    Toolbar="@(new List<string>() { "Search", "ColumnChooser"})"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll"})">
+                <SfDataManager HttpClientInstance="@httpClient" Url="/recipe" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+                <GridEditSettings AllowAdding="false" AllowEditing="false" AllowDeleting="false" Mode="EditMode.Normal"></GridEditSettings>
+                <GridEvents OnRecordDoubleClick="RecordDoubleClickHandler" TValue="RecipeListDto"></GridEvents>
+                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+                <GridPageSettings PageSize="10" PageSizes="@(new List<object>() {10, 20, 50,100})"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(RecipeListDto.Id)" HeaderText="ID" IsPrimaryKey="true" TextAlign="TextAlign.Center" Width="80" Visible="false" />
+                    <GridColumn Field="@nameof(RecipeListDto.Code)" HeaderText="Code" Width="100" />
+                    <GridColumn Field="@nameof(RecipeListDto.Description)" HeaderText="Description" Width="80" />
+                    <GridColumn Field="@nameof(RecipeListDto.ProductCode)" HeaderText="Product Code" Width="200" />
+                    <GridColumn Field="@nameof(RecipeListDto.ProductDescription)" HeaderText="Product Description" Width="100" />
+                    <GridColumn Field="@nameof(RecipeListDto.RecipeWeight)" HeaderText="Weight" Width="50" Format="N2" TextAlign="TextAlign.Right" />
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</AuthorizeView>
+
+<style>
+    .e-grid .e-headercelldiv {
+        font-size: 15px;
+        font-weight: bold;
+        color: #3c3c3c;
+    }
+
+    .e-grid .e-rowcell {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #f8f9fa;
+    }
+
+    .e-button {
+        font-size: 14px;
+    }
+
+    .e-icon-btn {
+        padding: 6px 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .ml-2 {
+        margin-left: 8px;
+    }
+</style>
+
+@code {
+    SfGrid<RecipeListDto>? DefaultGrid;
+    private HttpClient? httpClient;
+    // private List<ProductListDto> ProductList = new();
+    private int? SelectedRecipeId;
+
+    protected override void OnInitialized()
+    {
+        httpClient = HttpClientFactory.CreateClient("Auth");
+        base.OnInitialized();
+    }
+
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("recipe/create");
+    }
+
+    private void Update()
+    {
+        var selectedProduct = DefaultGrid?.SelectedRecords.FirstOrDefault();
+        if (selectedProduct != null)
+        {
+            NavigationManager.NavigateTo($"recipe/update/{selectedProduct.Id}");
+        }
+        else
+        {
+            JSRuntime.InvokeVoidAsync("alert", "Please select a recipe to update.");
+        }
+    }
+
+
+
+    private async Task ExportToExcel()
+    {
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.FileName = "Recipes.xlsx";
+        await DefaultGrid!.ExportToExcelAsync(ExcelProperties);
+
+    }
+
+    private async Task ExportToPdf()
+    {
+        PdfExportProperties PdfProperties = new PdfExportProperties();
+        PdfProperties.FileName = "Recipes.pdf";
+        await DefaultGrid!.ExportToPdfAsync(PdfProperties);
+
+
+    }
+
+    private void RecordDoubleClickHandler(RecordDoubleClickEventArgs<RecipeListDto> args)
+    {
+        NavigationManager.NavigateTo($"recipe/update/{args.RowData.Id}");
+    }
+}

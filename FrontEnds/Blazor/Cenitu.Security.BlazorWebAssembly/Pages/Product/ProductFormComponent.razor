@@ -1,0 +1,92 @@
+﻿@using Cenitu.Security.Dtos.Product
+@using Cenitu.Security.Dtos.Unit
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+
+<EditForm Model="@Product" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="row">
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Product Code</label>
+            <SfTextBox @bind-value="Product.Code" autofocus Placeholder="Enter Product Code" />
+        </div>
+        <div class="col-md-5">
+            <label class="form-label fw-bold">Description</label>
+            <SfTextBox @bind-value="Product.Description" Placeholder="Enter Description" />
+        </div>
+        <div class="col-md-5">
+            <label class="form-label fw-bold">Price</label>
+            <SfNumericTextBox @bind-value="Product.SellingPrice" Currency="USD" Placeholder="Enter Price" />
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Product Type</label>
+            <select class="form-control" @bind="Product.ProductType">
+                <option value="">-- Select Type --</option>
+                @foreach (var type in productTypes)
+                {
+                    <option value="@type.Value">@type.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Can be an option?</label>
+            <SfSwitch @bind-Checked="Product.CanBeAnOption"></SfSwitch>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <ProductUnitsComponent @ref="ProductUnitsComponent"
+                                   Units="@Product.ProductUnits" />
+        </div>
+
+        <div class="col-md-6">
+            <OptionalProductsComponent @ref="OptionalProductsComponent"
+                                       Options="@Product.ProductOptions"
+                                       CurrentProductId="@Product.Id" />
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a class="btn btn-outline-secondary" href="products">⬅ Back</a>
+        <button type="submit" class="btn btn-primary px-4">
+            @(Mode == "Create" ? "✅ Create Product" : "✅ Update Product")
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public ProductUpdateDto Product { get; set; } = new();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public string Mode { get; set; } = "Create";
+
+    public ProductUnitsComponent ProductUnitsComponent { get; set; }
+    public OptionalProductsComponent OptionalProductsComponent { get; set; }
+
+    private List<(ProductType Value, string Text)> productTypes = new();
+
+    protected override void OnInitialized()
+    {
+        productTypes = Enum.GetValues<ProductType>()
+                           .Select(e => (e, e.GetDisplayName()))
+                           .ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Product.ProductUnits = ProductUnitsComponent.GetUnits();
+        Product.ProductOptions = OptionalProductsComponent.GetOptions();
+
+        await OnValidSubmit.InvokeAsync();
+    }
+
+    // Eksik olan ve dışarıdan çağrılan metotlar:
+    public List<ProductOptionDto> GetProductOptions() => OptionalProductsComponent.GetOptions();
+    public List<ProductUnitDto> GetProductUnits() => ProductUnitsComponent.GetUnits();
+}

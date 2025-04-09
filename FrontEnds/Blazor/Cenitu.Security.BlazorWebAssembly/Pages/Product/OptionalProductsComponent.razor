@@ -1,0 +1,101 @@
+﻿@using Cenitu.Security.Dtos.Product
+@inject IHttpClientFactory HttpClientFactory
+
+<h4 class="text-center text-secondary">Optional Equipment</h4>
+
+<div class="input-group mb-3">
+    <select class="form-select" @bind="selectedProductId">
+        <option value="">-- Select Optional Equipment --</option>
+        @foreach (var prod in filteredProducts)
+        {
+            <option value="@prod.Id">@prod.Description</option>
+        }
+    </select>
+    <button type="button" class="btn btn-success" @onclick="AddOptionalProduct">➕ Add Option</button>
+</div>
+
+@if (localOptions.Any())
+{
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-secondary">
+            <tr>
+                <th>#</th>
+                <th>Optional Product</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (item, index) in localOptions.Select((x, i) => (x, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@item.OptionProductDescription</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                @onclick="@(() => RemoveOption(item.OptionProductId))">
+                            ❌ Remove
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info text-center">No optional equipment added.</div>
+}
+
+@code {
+    [Parameter] public List<ProductOptionDto> Options { get; set; } = new();
+    [Parameter] public int CurrentProductId { get; set; }
+
+    private List<ProductOptionDto> localOptions = new();
+    private List<ProductListDto> allProducts = new();
+    private List<ProductListDto> filteredProducts = new();
+    private int? selectedProductId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        localOptions = new List<ProductOptionDto>(Options);
+
+        var client = HttpClientFactory.CreateClient("Auth");
+        allProducts = await client.GetFromJsonAsync<List<ProductListDto>>("products") ?? [];
+
+        filteredProducts = allProducts
+            .Where(p => p.CanBeAnOption && p.Id != CurrentProductId && !localOptions.Any(o => o.OptionProductId == p.Id))
+            .ToList();
+    }
+
+    void AddOptionalProduct()
+    {
+        if (selectedProductId is null) return;
+
+        var product = filteredProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (product is null) return;
+
+        localOptions.Add(new ProductOptionDto
+            {
+                OptionProductId = product.Id,
+                OptionProductDescription = product.Description
+            });
+
+        filteredProducts.Remove(product);
+        selectedProductId = null;
+    }
+
+    void RemoveOption(int optionProductId)
+    {
+        var option = localOptions.FirstOrDefault(o => o.OptionProductId == optionProductId);
+        if (option is null) return;
+
+        localOptions.Remove(option);
+
+        var product = allProducts.First(p => p.Id == optionProductId);
+        filteredProducts.Add(product);
+        filteredProducts = filteredProducts.OrderBy(p => p.Description).ToList();
+    }
+
+    // Ana form tarafından çağrılır:
+    public List<ProductOptionDto> GetOptions() => localOptions;
+}

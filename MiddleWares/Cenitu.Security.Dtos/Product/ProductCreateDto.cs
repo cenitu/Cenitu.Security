@@ -10,7 +10,7 @@ namespace Cenitu.Security.Dtos.Product
         public bool CanBeAnOption { get; set; }
         public ProductType ProductType { get; set; }
         public List<ProductUnitDto> ProductUnits { get; set; } = new();
-        public List<ProductOptionDto> ProductOptions { get; set; } = [new()];
+        public List<ProductOptionDto> ProductOptions { get; set; } = [];
     }
 
 }

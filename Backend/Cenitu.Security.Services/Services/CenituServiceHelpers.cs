@@ -2,7 +2,7 @@
 
 namespace Cenitu.Security.Services.Services
 {
-    internal static class OrderServiceHelpers
+    internal static class CenituServiceHelpers
     {
 
         public static string RefineFilter(string filter)

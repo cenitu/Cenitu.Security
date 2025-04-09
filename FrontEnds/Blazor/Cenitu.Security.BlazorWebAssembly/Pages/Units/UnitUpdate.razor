@@ -1,0 +1,51 @@
+﻿@page "/unit/update/{id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary text-center mt-4">Update Unit</h3>
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <EditForm Model="@unit" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label class="form-label">Unit Name</label>
+                <SfTextBox @bind-Value="unit.Name" Placeholder="Enter unit name" />
+            </div>
+
+            <div class="form-group mt-3">
+                <label class="form-label">Symbol</label>
+                <SfTextBox @bind-Value="unit.Symbol" Placeholder="Enter symbol" />
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a class="btn btn-outline-secondary" href="units">⬅ Back</a>
+                <button class="btn btn-primary" type="submit">✅ Update</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private UnitDto unit = new();
+    private HttpClient HttpClient => HttpClientFactory.CreateClient("Auth");
+
+    protected override async Task OnInitializedAsync()
+    {
+        unit = await HttpClient.GetFromJsonAsync<UnitDto>($"units/{Id}") ?? new();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await HttpClient.PutAsJsonAsync("units", unit);
+
+        if (response.IsSuccessStatusCode)
+            NavigationManager.NavigateTo("units");
+        else
+            await JSRuntime.InvokeVoidAsync("alert", "Error updating unit!");
+    }
+}

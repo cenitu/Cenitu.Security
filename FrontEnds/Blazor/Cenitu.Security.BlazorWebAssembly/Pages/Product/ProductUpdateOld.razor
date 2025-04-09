@@ -1,0 +1,353 @@
+﻿@page "/product/updateold/{id:int}"
+@using Cenitu.Security.Dtos.Product
+@using Cenitu.Security.Dtos.Unit
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 class="text-center mt-4 text-primary">Update Product</h3>
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <div class="row">
+            <div class="col-md-2">
+                <label class="form-label fw-bold" for="Code">Product Code</label>
+               @* <input type="text" class="form-control" @bind="product.Code" required id="Code" name="codeInput" /> *@
+                <SfTextBox @bind-value="product.Code" autofocus FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Never" Placeholder="Enter Product Code" />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold" for="Description">Product Description</label>
+               @*  <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" /> *@
+                <SfTextBox @bind-value="product.Description" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Never" Placeholder="Enter Product Description" />
+            </div> <div class="col-md-5">
+                <label class="form-label fw-bold" for="SellingPrice">Product Price</label>
+               @*  <input type="text" class="form-control" @bind="product.Description" required id="Description" name="descriptionInput" /> *@
+                <SfNumericTextBox @bind-value="product.SellingPrice" FloatLabelType="Syncfusion.Blazor.Inputs.FloatLabelType.Never" Currency="USD" Placeholder="Enter Product Price" />
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Product Type</label>
+                <select class="form-control" @bind="product.ProductType">
+                    <option value="">-- Select a Product Type --</option>
+                    @foreach (var type in productTypes)
+                    {
+                        <option value="@type.Value">@type.Text</option>
+                    }
+                </select>
+
+
+            </div>
+            <div class="col-md-2 d-flex flex-column">
+                <label class="form-label fw-bold" for="CanBeAnOption">Can be an option?</label>
+                <SfSwitch CssClass="e-small" @bind-Checked="product.CanBeAnOption"></SfSwitch>
+            </div>
+
+        </div>
+        <hr class="my-4" />
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h4 class="text-center text-secondary">Product Units</h4>
+
+                <div class="input-group mb-3">
+                    <select class="form-select" @bind="selectedUnitId">
+                        <option value="">-- Select Unit --</option>
+                        @foreach (var unit in availableUnits)
+                        {
+                            <option value="@unit.Id">@unit.Symbol</option>
+                        }
+                    </select>
+                    <button class="btn btn-success" @onclick="AddUnit">➕ Add Unit</button>
+                </div>
+
+                @if (product.ProductUnits.Any())
+                {
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Primary</th>
+                                <th>Unit</th>
+                                <th>Conversion Factor</th>
+                                <th>Weight (kg)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var unit in product.ProductUnits)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <SfRadioButton Name="primaryUnit"
+                                                       Value="@unit.UnitSymbol"
+                                                       @bind-Checked="SelectedPrimaryUnit"
+                                                       @onclick="@(() => SetPrimaryUnit(unit))" />
+                                    </td>
+                                    <td>@unit.UnitSymbol</td>
+                                    <td>
+                                        <div class="position-relative">
+                                            <SfNumericTextBox TValue="decimal" @bind-Value="unit.ConversionFactor"
+                                                              Placeholder="Factor" Format="N3"
+                                                              CssClass="numeric-with-suffix" />
+                                            <span class="unit-suffix">
+                                                @product.ProductUnits.FirstOrDefault(u => u.IsPrimary)?.UnitSymbol
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="position-relative">
+                                            <SfNumericTextBox TValue="decimal" @bind-Value="unit.Weight"
+                                                              Placeholder="Weight" Format="N3"
+                                                              CssClass="numeric-with-suffix" />
+                                            <span class="unit-suffix">kg</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                @onclick="() => RemoveUnit(unit)">
+                                            ❌ Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center">No units added.</div>
+                }
+            </div>
+
+            <div class="col-md-6">
+                <h4 class="text-center text-secondary">Optional Equipment</h4>
+
+             
+                <div class="input-group mb-3">
+                    <select class="form-select" @bind="selectedProductId">
+                        <option value="">-- Select Optional Equipment --</option>
+                        @foreach (var product in filteredProducts)
+                        {
+                            <option value="@product.Id">@product.Description</option>
+                        }
+                    </select>
+                    <button class="btn btn-success" @onclick="AddOptionalProduct">➕ Add Option</button>
+                </div>
+
+                @if (product.ProductOptions.Any())
+                {
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>#</th>
+                                <th>Optional Product</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var (item, index) in product.ProductOptions.Select((item, idx) => (item, idx + 1)))
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>@item.OptionProductDescription</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                @onclick="() => RemoveOption(item.OptionProductId)">
+                                            ❌ Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center">No optional equipment added.</div>
+                }
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="d-flex justify-content-between mt-4">
+                <a class="btn btn-outline-secondary" href="products">⬅ Back</a>
+                <button class="btn btn-primary px-4" @onclick="UpdateProductAsync">✅ Update Product</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private ProductUpdateDto product = new ProductUpdateDto();
+    private List<UnitDto> availableUnits = new();
+    private List<UnitDto> allUnits = new();
+    private int? selectedUnitId;
+    private List<(ProductType Value, string Text)> productTypes = new();
+    private string? SelectedPrimaryUnit { get; set; }
+    private List<ProductListDto> allProducts = new();
+    private List<ProductListDto> filteredProducts = new();
+    private int? selectedProductId;
+    private HttpClient HttpClient => HttpClientFactory.CreateClient("Auth");
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Mevcut ürün bilgilerini API'den çek
+        product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"Products/{Id}") ?? new();
+        SelectedPrimaryUnit = product.ProductUnits.FirstOrDefault(u => u.IsPrimary)?.UnitSymbol!;
+
+        // Mevcut tüm birimleri çek
+        allUnits = (await HttpClient.GetFromJsonAsync<List<UnitDto>>("units")) ?? [];
+        allProducts = (await HttpClient.GetFromJsonAsync<List<ProductListDto>>("products")) ?? [];
+        allProducts = allProducts.Where(predicate => predicate.CanBeAnOption).ToList();
+        filteredProducts = new List<ProductListDto>(allProducts);
+        filteredProducts.RemoveAll(p => p.Id == product.Id || product.ProductOptions.Select(po=>po.OptionProductId).Contains(p.Id));
+        // Kullanılmayan birimleri listeye ekle
+        availableUnits = allUnits.Where(u => !product.ProductUnits.Any(pu => pu.UnitId == u.Id)).ToList();
+
+        productTypes = Enum.GetValues<ProductType>()
+                           .Select(e => (e, e.GetDisplayName())) // Eğer Display Name eklemek istersen burayı güncelle
+                           .ToList();
+    }
+
+    private void AddUnit()
+    {
+        if (selectedUnitId == null || selectedUnitId == 0)
+            return;
+
+        var selectedUnit = availableUnits.FirstOrDefault(u => u.Id == selectedUnitId);
+        if (selectedUnit == null)
+            return;
+
+        if (product.ProductUnits.Any(pu => pu.UnitId == selectedUnit.Id))
+            return;
+
+        bool isPrimary = product.ProductUnits.Count == 0;
+
+        if (isPrimary)
+        {
+            foreach (var unit in product.ProductUnits)
+            {
+                unit.IsPrimary = false;
+            }
+        }
+
+        product.ProductUnits.Add(new ProductUnitDto
+            {
+                ProductId = product.Id,
+                UnitId = selectedUnit.Id,
+                UnitSymbol = selectedUnit.Symbol,
+                ConversionFactor = 1.0M,
+                IsPrimary = isPrimary
+            });
+
+        availableUnits.Remove(selectedUnit);
+        selectedUnitId = null;
+    }
+
+    private void RemoveUnit(ProductUnitDto unit)
+    {
+        product.ProductUnits.Remove(unit);
+
+        var unitToReAdd = allUnits.FirstOrDefault(u => u.Id == unit.UnitId);
+        if (unitToReAdd != null)
+        {
+            availableUnits.Add(unitToReAdd);
+        }
+
+        if (unit.IsPrimary && product.ProductUnits.Count > 0)
+        {
+            product.ProductUnits[0].IsPrimary = true;
+        }
+    }
+
+    private void SetPrimaryUnit(ProductUnitDto selectedUnit)
+    {
+        // foreach (var unit in product.ProductUnits)
+        // {
+        //     unit.IsPrimary = (unit.UnitId == selectedUnit.UnitId);
+        // }
+        // var previousPrimaryUnit = product.ProductUnits.FirstOrDefault(u => u.IsPrimary);
+        var cf = selectedUnit.ConversionFactor;
+        foreach (var unit in product.ProductUnits)
+        {
+            unit.IsPrimary = false; // Önce tüm birimlerin IsPrimary değerini sıfırla
+            unit.ConversionFactor = unit.ConversionFactor / cf;
+        }
+        selectedUnit.IsPrimary = true;
+        SelectedPrimaryUnit = selectedUnit.UnitSymbol; // Seçilen birimin değerini güncelle
+    }
+
+    public async Task UpdateProductAsync()
+    {
+        if (!product.ProductUnits.Any(u => u.IsPrimary) && product.ProductUnits.Count > 0)
+        {
+            product.ProductUnits[0].IsPrimary = true;
+        }
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+        product.LastModifiedByUserName = user.Identity!.Name;
+        var response = await HttpClient.PutAsJsonAsync($"products", product);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("products");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Error updating product!");
+        }
+    }
+    private async Task AddOptionalProduct()
+    {
+        if (selectedProductId is null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please select a product first.");
+            return;
+        }
+
+        if (product.ProductOptions.Any(p => p.OptionProductId == selectedProductId.Value))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "This product is already added.");
+            return;
+        }
+
+        var selectedProduct = filteredProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (selectedProduct is null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Invalid selection.");
+            return;
+        }
+
+        product.ProductOptions.Add(new ProductOptionDto
+            {
+                ProductId = product.Id,
+                ProductDescription = product.Description,
+                OptionProductId = selectedProduct.Id,
+                OptionProductDescription = selectedProduct.Description
+            });
+
+        filteredProducts.Remove(selectedProduct);
+        selectedProductId = null;
+    }
+
+    private void RemoveOption(int optionProductId)
+    {
+        var removedProduct = product.ProductOptions.FirstOrDefault(x => x.OptionProductId == optionProductId);
+        if (removedProduct is null)
+            return;
+
+        product.ProductOptions.Remove(removedProduct);
+
+        var productToReAdd = allProducts.FirstOrDefault(p => p.Id == optionProductId);
+        if (productToReAdd != null)
+        {
+            filteredProducts.Add(productToReAdd);
+            filteredProducts = filteredProducts.OrderBy(p => p.Description).ToList();
+        }
+    }
+}

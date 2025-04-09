@@ -1,0 +1,50 @@
+﻿@page "/product/update/{id:int}"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 class="text-center mt-4 text-primary">Update Product</h3>
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <ProductFormComponent @ref="productForm"
+                              Product="@product"
+                              OnValidSubmit="@UpdateProductAsync"
+                              Mode="Update" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ProductUpdateDto product = new();
+    private ProductFormComponent productForm;
+
+    private HttpClient HttpClient => HttpClientFactory.CreateClient("Auth");
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Ürün bilgisini API'den çek
+        product = await HttpClient.GetFromJsonAsync<ProductUpdateDto>($"Products/{Id}") ?? new();
+    }
+
+    private async Task UpdateProductAsync()
+    {
+        // Bileşenlerden güncel verileri al ve DTO'ya ata
+        product.ProductOptions = productForm.GetProductOptions();
+        product.ProductUnits = productForm.GetProductUnits();
+
+        // Son güncelleyen kullanıcıyı belirle
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        product.LastModifiedByUserName = auth.User.Identity!.Name;
+
+        var response = await HttpClient.PutAsJsonAsync($"products", product);
+
+        if (response.IsSuccessStatusCode)
+            NavigationManager.NavigateTo("products");
+        else
+            await JSRuntime.InvokeVoidAsync("alert", "Error updating product!");
+    }
+}
