@@ -1,0 +1,58 @@
+﻿@page "/recipe/update/{id:int}"
+@using Cenitu.Security.Dtos.Recipe
+@inject IHttpClientFactory HttpClientFactory
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
+<h3 class="text-center mt-4 text-primary">Create New Recipe</h3>
+
+
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <RecipeFormComponent @ref="RecipeForm"
+                             HttpClient="HttpClient"
+                             recipe="recipe"
+                             Mode="Edit"
+                             OnValidSubmit="@Save">
+        </RecipeFormComponent>
+    </div>
+</div>
+
+<style>
+    .e-grid .e-altrow {
+        background-color: #aaf1eb;
+    }
+</style>
+@code {
+    [Parameter] public int Id { get; set; }
+    private RecipeCreateDto recipe = new RecipeCreateDto();
+    private RecipeFormComponent RecipeForm = new();
+
+    private bool isLoading = false;
+    override protected async Task OnInitializedAsync()
+    {
+        HttpClient = HttpClientFactory.CreateClient("Auth");
+        recipe = await HttpClient.GetFromJsonAsync<RecipeCreateDto>($"Recipe/{Id}") ?? new();
+
+
+    }
+
+
+    private async Task Save()
+    {
+        isLoading = true;
+        recipe.RecipeLines.RemoveAll(rl => rl.ProductId == 0);
+        var result = await HttpClient.PutAsJsonAsync("recipe", recipe);
+        isLoading = false;
+        if (result.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("recipes");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Error creating recipe");
+        }
+    }
+
+}

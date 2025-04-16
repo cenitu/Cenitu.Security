@@ -23,7 +23,7 @@ namespace Cenitu.Security.Api.Controllers
             [FromQuery(Name = "$orderby")] string? orderby)
         {
             var result = await recipeService.GetRecipesAsync(skip, top, filter, orderby);
-                        if (inlinecount == null)
+            if (inlinecount == null)
             {
                 return Ok(result.Items);
             }
@@ -39,6 +39,12 @@ namespace Cenitu.Security.Api.Controllers
         public async Task<IActionResult> Post([FromBody] RecipeCreateDto recipeDto)
         {
             var result = await recipeService.CreateRecipeAsync(recipeDto);
+            return Ok(result);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] RecipeCreateDto recipeDto)
+        {
+            var result = await recipeService.UpdateRecipeAsync(recipeDto);
             return Ok(result);
         }
     }

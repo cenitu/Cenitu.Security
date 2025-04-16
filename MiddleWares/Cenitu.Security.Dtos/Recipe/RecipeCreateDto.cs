@@ -2,9 +2,9 @@
 {
     public class RecipeCreateDto
     {
+        public int Id { get; set; }
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
-      
         public int ProductId { get; set; }
         public decimal RecipeWeight { get;  }
         public List<RecipeLineCreateDto> RecipeLines { get; set; } = [];

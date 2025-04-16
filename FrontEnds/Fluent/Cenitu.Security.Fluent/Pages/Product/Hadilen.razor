@@ -1,0 +1,34 @@
+﻿@using Syncfusion.Blazor.Grids
+@using Microsoft.FluentUI.AspNetCore.Components
+@page "/product/hadilen"
+<FluentCard Style="padding: 1rem;">
+    <HeadContent >Ürün Listesi</HeadContent>
+
+    <SfGrid DataSource="@Products" AllowSorting="true" AllowFiltering="true" AllowPaging="true"
+            Width="100%" Height="400px">
+        <GridColumns>
+            <GridColumn Field="Id" HeaderText="ID" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+            <GridColumn Field="Name" HeaderText="Ürün Adı" Width="200"></GridColumn>
+            <GridColumn Field="Category" HeaderText="Kategori" Width="150"></GridColumn>
+            <GridColumn Field="Price" HeaderText="Fiyat" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+</FluentCard>
+
+@code {
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Category { get; set; } = "";
+        public decimal Price { get; set; }
+    }
+
+    private List<Product> Products = new()
+    {
+        new() { Id = 1, Name = "Kalem", Category = "Kırtasiye", Price = 12.5M },
+        new() { Id = 2, Name = "Defter", Category = "Kırtasiye", Price = 24M },
+        new() { Id = 3, Name = "Çanta", Category = "Okul", Price = 185M },
+        new() { Id = 4, Name = "Laptop", Category = "Elektronik", Price = 13500M }
+    };
+}

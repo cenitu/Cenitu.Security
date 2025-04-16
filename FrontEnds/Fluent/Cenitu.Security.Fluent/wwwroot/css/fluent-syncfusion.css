@@ -1,0 +1,19 @@
+﻿/* Grid header rengi Fluent'e uygun hale getiriliyor */
+.e-grid .e-headercell {
+    background-color: var(--neutral-lighter);
+    color: var(--neutral-primary);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Grid hücre yazı fontları ve renk uyumu */
+.e-grid .e-rowcell {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: var(--neutral-dark);
+}
+
+/* Alternatif satır stili */
+.e-grid .e-altrow {
+    background-color: var(--neutral-light);
+}
